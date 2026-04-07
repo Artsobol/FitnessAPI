@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'io.github.artsobol'
-version = '0.0.1-SNAPSHOT'
+version = '0.2.0'
 description = 'FitnessAPI'
 
 java {
@@ -26,9 +26,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation("nl.basjes.parse.useragent:yauaa:8.1.1")
-    implementation("org.mapstruct:mapstruct-processor:1.6.3")
     implementation("org.mapstruct:mapstruct:1.6.3")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     compileOnly 'org.projectlombok:lombok'
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     runtimeOnly 'org.postgresql:postgresql'
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
@@ -39,6 +40,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+    testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
