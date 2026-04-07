@@ -5,13 +5,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="20260406_create_refresh_tokens_table" author="artsobol">
-        <createTable tableName="refresh_tokens">
+    <changeSet id="20260406_create_refresh_token_table" author="artsobol">
+        <createTable tableName="refresh_token">
             <column name="id" type="bigserial" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="token_hash" type="varchar(255)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="uq_refresh_tokens_token_hash"/>
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_refresh_token_token_hash"/>
             </column>
             <column name="user_id" type="bigint">
                 <constraints nullable="false"/>
@@ -22,7 +22,7 @@
             <column name="revoked_at" type="timestamptz"/>
             <column name="revoked_reason" type="varchar(20)"/>
             <column name="replace_by_id" type="bigint">
-                <constraints unique="true" uniqueConstraintName="uq_refresh_tokens_replace_by_id"/>
+                <constraints unique="true" uniqueConstraintName="uq_refresh_token_replace_by_id"/>
             </column>
             <column name="session_id" type="uuid">
                 <constraints nullable="false"/>
@@ -43,7 +43,7 @@
         </createTable>
 
         <addForeignKeyConstraint
-                baseTableName="refresh_tokens"
+                baseTableName="refresh_token"
                 baseColumnNames="user_id"
                 constraintName="fk_refresh_token_user_id"
                 referencedTableName="users"
@@ -51,21 +51,21 @@
                 onDelete="CASCADE"/>
 
         <addForeignKeyConstraint
-                baseTableName="refresh_tokens"
+                baseTableName="refresh_token"
                 baseColumnNames="replace_by_id"
                 constraintName="fk_refresh_token_replace_by_id"
-                referencedTableName="refresh_tokens"
+                referencedTableName="refresh_token"
                 referencedColumnNames="id"/>
 
-        <createIndex tableName="refresh_tokens" indexName="idx_refresh_token_user_id">
+        <createIndex tableName="refresh_token" indexName="idx_refresh_token_user_id">
             <column name="user_id"/>
         </createIndex>
 
-        <createIndex tableName="refresh_tokens" indexName="idx_refresh_token_session_id">
+        <createIndex tableName="refresh_token" indexName="idx_refresh_token_session_id">
             <column name="session_id"/>
         </createIndex>
 
-        <createIndex tableName="refresh_tokens" indexName="idx_refresh_token_token_hash">
+        <createIndex tableName="refresh_token" indexName="idx_refresh_token_token_hash">
             <column name="token_hash"/>
         </createIndex>
     </changeSet>

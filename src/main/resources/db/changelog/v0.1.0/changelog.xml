@@ -6,7 +6,7 @@
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <include file="001-create-users.xml" relativeToChangelogFile="true"/>
-    <include file="002-create-refresh_tokens.xml" relativeToChangelogFile="true"/>
+    <include file="002-create-refresh_token.xml" relativeToChangelogFile="true"/>
 
     <changeSet id="add-tag-0.0.1" author="artsobol">
         <tagDatabase tag="v.0.0.1"/>

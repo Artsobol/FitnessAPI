@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "refresh_tokens", indexes = {
+@Table(name = "refresh_token", indexes = {
         @Index(name = "idx_refresh_token_user_id", columnList = "user_id"),
         @Index(name = "idx_refresh_token_session_id", columnList = "session_id"),
         @Index(name = "idx_refresh_token_token_hash", columnList = "token_hash")
