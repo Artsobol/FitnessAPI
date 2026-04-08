@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0]
+
+### Added
+
+- article and category features;
+- `ArticleController`, `ArticleService`, `ArticleRepository`, and `ArticleMapper`;
+- `CategoryController`, `CategoryService`, `CategoryRepository`, and `CategoryMapper`;
+- DTOs for article and category create, update, and read operations;
+- `Article` and `Category` entities;
+- Liquibase migrations for `article`, `category`, `article_category`, and `article_video` tables;
+- mappers for article and category DTO conversion.
+
+### Changed
+
+- Liquibase master changelog extended with `v0.3.0`;
+- project version bumped to `0.3.0`.
+
 ## [0.2.0]
 
 ### Added
