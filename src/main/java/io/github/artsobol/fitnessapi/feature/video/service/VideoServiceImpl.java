@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class VideoServiceImpl implements VideoService {
+public class VideoServiceImpl implements VideoService, VideoFinder {
 
     private final VideoRepository repository;
     private final VideoMapper mapper;
@@ -24,7 +24,7 @@ public class VideoServiceImpl implements VideoService {
     @Override
     @Transactional(readOnly = true)
     public VideoResponse getVideoById(Long id) {
-        Video entity = getVideo(id);
+        Video entity = findByIdOrThrow(id);
         return mapper.toResponse(entity);
     }
 
@@ -43,7 +43,7 @@ public class VideoServiceImpl implements VideoService {
     @Transactional
     public VideoResponse updateVideo(Long id, UpdateVideoRequest request) {
         log.info("Updating video with id: {}", id);
-        Video entity = getVideo(id);
+        Video entity = findByIdOrThrow(id);
         if (request.url() != null && !request.url().equals(entity.getUrl())) {
             ensureUrlNotExists(request.url());
             log.debug("Video with id: {} change url from: {} - to: {}", id, entity.getUrl(), request.url());
@@ -60,11 +60,11 @@ public class VideoServiceImpl implements VideoService {
     @Transactional
     public void deleteVideo(Long id) {
         log.info("Deleting video with id: {}", id);
-        Video entity = getVideo(id);
+        Video entity = findByIdOrThrow(id);
         repository.delete(entity);
     }
 
-    private Video getVideo(Long id) {
+    public Video findByIdOrThrow(Long id) {
         log.debug("Finding video with id: {}", id);
         return repository.findById(id).orElseThrow(
                 () -> new NotFoundException("{video.not.found}", id)
