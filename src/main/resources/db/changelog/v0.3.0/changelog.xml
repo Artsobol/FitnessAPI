@@ -5,9 +5,12 @@
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <include file="001-create-category.xml" relativeToChangelogFile="true"/>
+    <include file="002-create-article.xml" relativeToChangelogFile="true"/>
+    <include file="003-create-article-category.xml" relativeToChangelogFile="true"/>
+    <include file="004-create-article-video.xml" relativeToChangelogFile="true"/>
 
-    <changeSet id="add-tag-0.0.3" author="artsobol">
-        <tagDatabase tag="v0.0.3"/>
+    <changeSet id="add-tag-0.3.0" author="artsobol">
+        <tagDatabase tag="v0.3.0"/>
     </changeSet>
 
 </databaseChangeLog>
