@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CategoryServiceImpl implements CategoryService {
+public class CategoryServiceImpl implements CategoryService, CategoryFinder {
 
     private final CategoryRepository repository;
     private final CategoryMapper mapper;
@@ -33,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public CategoryResponse getById(Long id) {
-        Category entity = findById(id);
+        Category entity = findByIdOrThrow(id);
         return mapper.toResponse(entity);
     }
 
@@ -50,6 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("Creating category with slug: {}", request.slug());
         ensureSlugNotExists(request.slug());
         Category entity = Category.create(request.name(), request.slug());
+        repository.save(entity);
 
         return mapper.toResponse(entity);
     }
@@ -83,7 +84,7 @@ public class CategoryServiceImpl implements CategoryService {
         return repository.findBySlug(slug).orElseThrow(() -> new NotFoundException("{category.slug.not.found}", slug));
     }
 
-    private Category findById(Long id) {
+    public Category findByIdOrThrow(Long id) {
         log.debug("Finding category with id: {}", id);
         return repository.findById(id).orElseThrow(() -> new NotFoundException("{category.id.not.found}", id));
     }
