@@ -1,6 +1,5 @@
 package io.github.artsobol.fitnessapi.feature.article.service;
 
-import io.github.artsobol.fitnessapi.exception.http.ConflictException;
 import io.github.artsobol.fitnessapi.exception.http.NotFoundException;
 import io.github.artsobol.fitnessapi.feature.article.dto.request.CreateArticleRequest;
 import io.github.artsobol.fitnessapi.feature.article.dto.request.UpdateArticleRequest;
@@ -22,7 +21,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ArticleServiceImpl implements ArticleService {
+public class ArticleServiceImpl implements ArticleService, ArticleFinder {
 
     private final ArticleMapper mapper;
     private final VideoFinder videoFinder;
@@ -32,7 +31,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional(readOnly = true)
     public ArticleResponse getById(Long id) {
-        Article entity = findById(id);
+        Article entity = findByIdOrThrow(id);
         return mapper.toResponse(entity);
     }
 
@@ -57,7 +56,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public ArticleResponse update(Long id, UpdateArticleRequest request) {
         log.info("Updating article with id: {}", id);
-        Article entity = findById(id);
+        Article entity = findByIdOrThrow(id);
         if (request.title() != null) {
             entity.updateTitle(request.title());
         }
@@ -72,7 +71,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public ArticleResponse addVideo(Long articleId, Long videoId) {
         log.info("Add video with id: {} for article with id: {}", videoId, articleId);
-        Article entity = findById(articleId);
+        Article entity = findByIdOrThrow(articleId);
         Video video = videoFinder.findByIdOrThrow(videoId);
         entity.addVideo(video);
 
@@ -83,7 +82,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public ArticleResponse addCategory(Long articleId, Long categoryId) {
         log.info("Add category with id: {} for article with id: {}", categoryId, articleId);
-        Article entity = findById(articleId);
+        Article entity = findByIdOrThrow(articleId);
         Category category = categoryFinder.findByIdOrThrow(categoryId);
         entity.addCategory(category);
 
@@ -94,7 +93,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public ArticleResponse removeVideo(Long articleId, Long videoId) {
         log.info("Remove video with id: {} for article with id: {}", videoId, articleId);
-        Article entity = findById(articleId);
+        Article entity = findByIdOrThrow(articleId);
         Video video = videoFinder.findByIdOrThrow(videoId);
         entity.removeVideo(video);
 
@@ -105,7 +104,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public ArticleResponse removeCategory(Long articleId, Long categoryId) {
         log.info("Delete category with id: {} for article with id: {}", categoryId, articleId);
-        Article entity = findById(articleId);
+        Article entity = findByIdOrThrow(articleId);
         Category category = categoryFinder.findByIdOrThrow(categoryId);
         entity.removeCategory(category);
 
@@ -116,11 +115,12 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public void delete(Long id) {
         log.info("Deleting article with id: {}", id);
-        Article entity = findById(id);
+        Article entity = findByIdOrThrow(id);
         repository.delete(entity);
     }
 
-    private Article findById(Long id) {
+    @Override
+    public Article findByIdOrThrow(Long id) {
         log.debug("Finding article with id: {}", id);
         return repository.findById(id).orElseThrow(() -> new NotFoundException("{article.id.not.found}", id));
     }
