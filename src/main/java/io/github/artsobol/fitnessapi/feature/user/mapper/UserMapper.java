@@ -13,5 +13,6 @@ public interface UserMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id")
     @Mapping(target = "username")
+    @Mapping(target = "role")
     UserResponse toResponse(User user);
 }
