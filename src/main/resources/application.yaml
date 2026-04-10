@@ -21,6 +21,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
+  mvc:
+    servlet:
+      path: /api/v1
+
 app:
   i18n:
     basename: classpath:i18n/messages/messages,classpath:i18n/errors/errors,classpath:i18n/validations/validations
