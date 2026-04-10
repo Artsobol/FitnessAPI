@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0]
+
+### Added
+
+- `tag`, `type`, and `training` features;
+- `TagController`, `TagService`, `TagRepository`, and `TagMapper`;
+- `TypeController`, `TypeService`, `TypeRepository`, and `TypeMapper`;
+- `TrainingController`, `TrainingService`, `TrainingRepository`, `TrainingExerciseRepository`, and training mappers;
+- DTOs for tag, type, and training create, update, and read operations;
+- `Tag`, `Type`, `Training`, and `TrainingExercise` entities;
+- support for training exercise items with duplicate exercises inside one training;
+- training item deletion by `trainingExerciseId` via `/trainings/{trainingId}/exercise-items/{trainingExerciseId}`;
+- Liquibase migrations for `tag`, `type`, `training`, `training_tag`, `training_type`, and `training_exercise` tables;
+- localized validation and error messages for comment, exercise, tag, type, training, and training exercise flows.
+
+### Changed
+
+- README updated to reflect the current project scope and launch steps;
+- project documentation aligned with the training module and new taxonomy features;
+- i18n bundles completed for all keys currently used in the codebase;
+- project version bumped to `0.4.0`.
+
 ## [0.3.0]
 
 ### Added
