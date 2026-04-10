@@ -18,7 +18,7 @@ public interface ExerciseService {
 
     ExerciseResponse addVideo(Long id, Long videoId);
 
-    ExerciseResponse removeVideo(Long id, Long videoId);
+    void removeVideo(Long id, Long videoId);
 
     void deactivate(Long id);
 }

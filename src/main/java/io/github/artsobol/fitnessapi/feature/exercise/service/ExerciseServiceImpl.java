@@ -37,14 +37,14 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseResponse> getAll() {
-        log.debug("Finding all exercise");
+        log.debug("Find all exercise");
         return repository.findByIsActiveTrue().stream().map(mapper::toResponse).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public ExerciseResponse create(CreateExerciseRequest request) {
-        log.info("Creating exercise");
+        log.info("Create exercise title={}", request.title());
         Exercise entity = Exercise.create(
                 request.title(),
                 request.description(),
@@ -59,7 +59,7 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
     @Override
     @Transactional
     public ExerciseResponse update(Long id, UpdateExerciseRequest request) {
-        log.info("Updating exercise with id: {}", id);
+        log.info("Update exercise exerciseId={}", id);
         Exercise entity = findByIdOrThrow(id);
         if (request.title() != null && !request.title().isBlank()) {
             entity.updateTitle(request.title());
@@ -80,7 +80,7 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
     @Override
     @Transactional
     public ExerciseResponse addVideo(Long id, Long videoId) {
-        log.info("Add video with id: {} for exercise with id: {}", videoId, id);
+        log.info("Add video videoId={} fromExerciseId={}", videoId, id);
         Exercise entity = findByIdOrThrow(id);
         Video video = videoFinder.findByIdOrThrow(videoId);
         entity.addVideo(video);
@@ -90,26 +90,24 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
 
     @Override
     @Transactional
-    public ExerciseResponse removeVideo(Long id, Long videoId) {
-        log.info("Remove video with id: {} for exercise with id: {}", videoId, id);
+    public void removeVideo(Long id, Long videoId) {
+        log.info("Remove video videoId={} fromExerciseId={}", videoId, id);
         Exercise entity = findByIdOrThrow(id);
         Video video = videoFinder.findByIdOrThrow(videoId);
         entity.removeVideo(video);
-
-        return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
     public void deactivate(Long id) {
-        log.info("Deactivate exercise with id: {}", id);
+        log.info("Deactivate exercise id={}", id);
         Exercise entity = findByIdOrThrow(id);
         entity.deactivate();
     }
 
     @Override
     public Exercise findByIdOrThrow(Long id) {
-        log.debug("Finding exercise with id: {}", id);
+        log.debug("Find exercise id={}", id);
         return repository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new NotFoundException("{exercise.id.not.found}", id));
     }

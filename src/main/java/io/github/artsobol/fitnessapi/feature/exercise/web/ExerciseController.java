@@ -4,79 +4,73 @@ import io.github.artsobol.fitnessapi.feature.exercise.dto.request.CreateExercise
 import io.github.artsobol.fitnessapi.feature.exercise.dto.request.UpdateExerciseRequest;
 import io.github.artsobol.fitnessapi.feature.exercise.dto.response.ExerciseResponse;
 import io.github.artsobol.fitnessapi.feature.exercise.service.ExerciseService;
+import io.github.artsobol.fitnessapi.utils.UriUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Validated
 @RestController
-@RequestMapping("api/v1/exercises")
+@RequestMapping("/exercises")
 @RequiredArgsConstructor
 public class ExerciseController {
 
-    private final ExerciseService service;
+    private final ExerciseService exerciseService;
 
     @GetMapping
-    public ResponseEntity<List<ExerciseResponse>> getAll() {
-        List<ExerciseResponse> response = service.getAll();
-
-        return ResponseEntity.ok(response);
+    public List<ExerciseResponse> getAll() {
+        return exerciseService.getAll();
     }
 
     @GetMapping("/{exerciseId}")
-    public ResponseEntity<ExerciseResponse> getById(@PathVariable Long exerciseId) {
-        ExerciseResponse response = service.getById(exerciseId);
-
-        return ResponseEntity.ok(response);
+    public ExerciseResponse getById(@PathVariable @Positive Long exerciseId) {
+        return exerciseService.getById(exerciseId);
     }
 
     @PostMapping
-    public ResponseEntity<ExerciseResponse> update(
+    public ResponseEntity<ExerciseResponse> create(@RequestBody @Valid CreateExerciseRequest request) {
+        ExerciseResponse response = exerciseService.create(request);
 
-            @RequestBody @Valid CreateExerciseRequest request
-    ) {
-        ExerciseResponse response = service.create(request);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.created(UriUtils.buildLocation(response.id())).body(response);
     }
 
     @PatchMapping("/{exerciseId}")
-    public ResponseEntity<ExerciseResponse> create(
-            @PathVariable Long exerciseId,
+    public ExerciseResponse update(
+            @PathVariable @Positive Long exerciseId,
             @RequestBody @Valid UpdateExerciseRequest request
     ) {
-        ExerciseResponse response = service.update(exerciseId, request);
+        return exerciseService.update(exerciseId, request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/{exerciseId}/videos/{videoId}/add")
-    public ResponseEntity<ExerciseResponse> addVideo(@PathVariable Long exerciseId, @PathVariable Long videoId) {
-        ExerciseResponse response = service.addVideo(exerciseId, videoId);
-
-        return ResponseEntity.ok(response);
+    @PutMapping("/{exerciseId}/videos/{videoId}")
+    public ExerciseResponse addVideo(@PathVariable @Positive Long exerciseId, @PathVariable @Positive  Long videoId) {
+        return exerciseService.addVideo(exerciseId, videoId);
     }
 
-    @PatchMapping("/{exerciseId}/videos/{videoId}/remove")
-    public ResponseEntity<ExerciseResponse> removeVideo(@PathVariable Long exerciseId, @PathVariable Long videoId) {
-        ExerciseResponse response = service.removeVideo(exerciseId, videoId);
+    @DeleteMapping("/{exerciseId}/videos/{videoId}")
+    public ResponseEntity<Void> removeVideo(@PathVariable @Positive Long exerciseId, @PathVariable @Positive  Long videoId) {
+        exerciseService.removeVideo(exerciseId, videoId);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{exerciseId}")
-    public ResponseEntity<Void> delete(@PathVariable Long exerciseId) {
-        service.deactivate(exerciseId);
+    public ResponseEntity<Void> delete(@PathVariable @Positive Long exerciseId) {
+        exerciseService.deactivate(exerciseId);
 
         return ResponseEntity.noContent().build();
     }
