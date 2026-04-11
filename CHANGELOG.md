@@ -5,20 +5,29 @@
 ### Added
 
 - `tag`, `type`, and `training` features;
+- `profile`, `training favourite`, `training rating`, `training session`, and `training session exercise` features;
 - `TagController`, `TagService`, `TagRepository`, and `TagMapper`;
 - `TypeController`, `TypeService`, `TypeRepository`, and `TypeMapper`;
 - `TrainingController`, `TrainingService`, `TrainingRepository`, `TrainingExerciseRepository`, and training mappers;
+- `ProfileController`, `ProfileService`, `ProfileRepository`, and `ProfileMapper`;
+- `TrainingFavouriteController`, `TrainingFavouriteService`, and `TrainingFavouriteRepository`;
+- `TrainingRatingController`, `TrainingRatingService`, and `TrainingRatingRepository`;
+- `TrainingSessionController`, `TrainingSessionService`, `TrainingSessionRepository`, and session mappers;
+- `TrainingSessionExerciseController`, `TrainingSessionExerciseService`, and `TrainingSessionExerciseRepository`;
 - DTOs for tag, type, and training create, update, and read operations;
-- `Tag`, `Type`, `Training`, and `TrainingExercise` entities;
+- DTOs for profile, training favourite, training rating, training session, and training session exercise read/write operations;
+- `Tag`, `Type`, `Training`, `TrainingExercise`, `Profile`, `TrainingFavourite`, `TrainingRating`, `TrainingSession`, and `TrainingSessionExercise` entities;
 - support for training exercise items with duplicate exercises inside one training;
 - training item deletion by `trainingExerciseId` via `/trainings/{trainingId}/exercise-items/{trainingExerciseId}`;
-- Liquibase migrations for `tag`, `type`, `training`, `training_tag`, `training_type`, and `training_exercise` tables;
-- localized validation and error messages for comment, exercise, tag, type, training, and training exercise flows.
+- training favourites and ratings flows;
+- training session lifecycle with exercise-level progress tracking;
+- Liquibase migrations for `tag`, `type`, `training`, `training_tag`, `training_type`, `training_exercise`, `profiles`, `training_favourite`, `training_rating`, `training_session`, and `training_session_exercise` tables;
+- localized validation and error messages for profile, rating, training session, favourite, and training flows.
 
 ### Changed
 
 - README updated to reflect the current project scope and launch steps;
-- project documentation aligned with the training module and new taxonomy features;
+- project documentation aligned with training progress, favourites, ratings, and profile features;
 - i18n bundles completed for all keys currently used in the codebase;
 - project version bumped to `0.4.0`.
 
