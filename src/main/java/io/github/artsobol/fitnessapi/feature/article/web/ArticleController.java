@@ -1,13 +1,17 @@
 package io.github.artsobol.fitnessapi.feature.article.web;
 
+import io.github.artsobol.fitnessapi.api.common.dto.SliceResponse;
 import io.github.artsobol.fitnessapi.feature.article.dto.request.CreateArticleRequest;
 import io.github.artsobol.fitnessapi.feature.article.dto.request.UpdateArticleRequest;
 import io.github.artsobol.fitnessapi.feature.article.dto.response.ArticleResponse;
 import io.github.artsobol.fitnessapi.feature.article.service.ArticleService;
+import io.github.artsobol.fitnessapi.utils.UriUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,79 +21,72 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
+@Validated
 @RestController
-@RequestMapping("/api/v1/articles")
+@RequestMapping("/articles")
 @RequiredArgsConstructor
 public class ArticleController {
 
-    private final ArticleService service;
+    private final ArticleService articleService;
 
     @GetMapping("/{articleId}")
-    public ResponseEntity<ArticleResponse> getById(@PathVariable Long articleId) {
-        ArticleResponse response = service.getById(articleId);
-
-        return ResponseEntity.ok(response);
+    public ArticleResponse getById(@PathVariable @Positive Long articleId) {
+        return articleService.getById(articleId);
     }
 
     @GetMapping
-    public ResponseEntity<List<ArticleResponse>> getAll() {
-        List<ArticleResponse> response = service.getAll();
-
-        return ResponseEntity.ok(response);
+    public SliceResponse<ArticleResponse> getAll(Pageable pageable) {
+        return SliceResponse.from(articleService.getAll(pageable));
     }
 
     @PostMapping
     public ResponseEntity<ArticleResponse> create(@RequestBody @Valid CreateArticleRequest request) {
-        ArticleResponse response = service.create(request);
+        ArticleResponse response = articleService.create(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.created(UriUtils.buildLocation(response.id())).body(response);
     }
 
     @PatchMapping("/{articleId}")
-    public ResponseEntity<ArticleResponse> update(
-            @PathVariable Long articleId,
+    public ArticleResponse update(
+            @PathVariable @Positive Long articleId,
             @RequestBody @Valid UpdateArticleRequest request
     ) {
-        ArticleResponse response = service.update(articleId, request);
-
-        return ResponseEntity.ok(response);
+        return articleService.update(articleId, request);
     }
 
     @DeleteMapping("/{articleId}")
-    public ResponseEntity<ArticleResponse> delete(
-            @PathVariable Long articleId
-    ) {
-        service.delete(articleId);
+    public ResponseEntity<Void> delete(@PathVariable Long articleId) {
+        articleService.delete(articleId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{articleId}/categories/{categoryId}")
-    public ResponseEntity<ArticleResponse> addCategory(@PathVariable Long articleId, @PathVariable Long categoryId) {
-        ArticleResponse response = service.addCategory(articleId, categoryId);
-
-        return ResponseEntity.ok(response);
+    public ArticleResponse addCategory(
+            @PathVariable @Positive Long articleId,
+            @PathVariable @Positive Long categoryId
+    ) {
+        return articleService.addCategory(articleId, categoryId);
     }
 
     @DeleteMapping("/{articleId}/categories/{categoryId}")
-    public ResponseEntity<ArticleResponse> removeCategory(@PathVariable Long articleId, @PathVariable Long categoryId) {
-        service.removeCategory(articleId, categoryId);
+    public ResponseEntity<Void> removeCategory(
+            @PathVariable @Positive Long articleId,
+            @PathVariable @Positive Long categoryId
+    ) {
+        articleService.removeCategory(articleId, categoryId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{articleId}/videos/{videoId}")
-    public ResponseEntity<ArticleResponse> addVideo(@PathVariable Long articleId, @PathVariable Long videoId) {
-        ArticleResponse response = service.addVideo(articleId, videoId);
-
-        return ResponseEntity.ok(response);
+    public ArticleResponse addVideo(@PathVariable @Positive Long articleId, @PathVariable @Positive Long videoId) {
+        return articleService.addVideo(articleId, videoId);
     }
 
     @DeleteMapping("/{articleId}/videos/{videoId}")
-    public ResponseEntity<ArticleResponse> removeVideo(@PathVariable Long articleId, @PathVariable Long videoId) {
-        service.removeVideo(articleId, videoId);
+    public ResponseEntity<Void> removeVideo(@PathVariable @Positive Long articleId, @PathVariable @Positive Long videoId) {
+        articleService.removeVideo(articleId, videoId);
 
         return ResponseEntity.noContent().build();
     }

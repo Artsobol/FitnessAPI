@@ -1,6 +1,6 @@
-package io.github.artsobol.fitnessapi.feature.category.repository;
+package io.github.artsobol.fitnessapi.feature.article.repository;
 
-import io.github.artsobol.fitnessapi.feature.category.entity.Category;
+import io.github.artsobol.fitnessapi.feature.article.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

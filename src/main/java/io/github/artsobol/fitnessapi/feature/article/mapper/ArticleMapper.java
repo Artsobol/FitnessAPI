@@ -3,7 +3,6 @@ package io.github.artsobol.fitnessapi.feature.article.mapper;
 import io.github.artsobol.fitnessapi.config.persistence.MapStructConfig;
 import io.github.artsobol.fitnessapi.feature.article.dto.response.ArticleResponse;
 import io.github.artsobol.fitnessapi.feature.article.entity.Article;
-import io.github.artsobol.fitnessapi.feature.category.mapper.CategoryMapper;
 import io.github.artsobol.fitnessapi.feature.video.mapper.VideoMapper;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;

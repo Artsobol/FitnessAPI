@@ -1,4 +1,4 @@
-package io.github.artsobol.fitnessapi.feature.category.entity;
+package io.github.artsobol.fitnessapi.feature.article.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,6 +50,15 @@ public class Category {
         entity.updateSlug(slug);
 
         return entity;
+    }
+
+    public void applyPatch(String name, String slug) {
+        if (slug != null) {
+            this.updateSlug(slug);
+        }
+        if (name != null) {
+            this.updateName(name);
+        }
     }
 
     public void updateName(String name) {

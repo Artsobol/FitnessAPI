@@ -1,8 +1,8 @@
-package io.github.artsobol.fitnessapi.feature.category.mapper;
+package io.github.artsobol.fitnessapi.feature.article.mapper;
 
 import io.github.artsobol.fitnessapi.config.persistence.MapStructConfig;
-import io.github.artsobol.fitnessapi.feature.category.dto.response.CategoryResponse;
-import io.github.artsobol.fitnessapi.feature.category.entity.Category;
+import io.github.artsobol.fitnessapi.feature.article.dto.response.CategoryResponse;
+import io.github.artsobol.fitnessapi.feature.article.entity.Category;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

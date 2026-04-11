@@ -3,14 +3,14 @@ package io.github.artsobol.fitnessapi.feature.article.service;
 import io.github.artsobol.fitnessapi.feature.article.dto.request.CreateArticleRequest;
 import io.github.artsobol.fitnessapi.feature.article.dto.request.UpdateArticleRequest;
 import io.github.artsobol.fitnessapi.feature.article.dto.response.ArticleResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 public interface ArticleService {
 
     ArticleResponse getById(Long id);
 
-    List<ArticleResponse> getAll();
+    Slice<ArticleResponse> getAll(Pageable pageable);
 
     ArticleResponse create(CreateArticleRequest request);
 
@@ -20,9 +20,9 @@ public interface ArticleService {
 
     ArticleResponse addCategory(Long articleId, Long categoryId);
 
-    ArticleResponse removeVideo(Long articleId, Long videoId);
+    void removeVideo(Long articleId, Long videoId);
 
-    ArticleResponse removeCategory(Long articleId, Long categoryId);
+    void removeCategory(Long articleId, Long categoryId);
 
     void delete(Long id);
 }

@@ -1,19 +1,19 @@
-package io.github.artsobol.fitnessapi.feature.category.service;
+package io.github.artsobol.fitnessapi.feature.article.service;
 
 import io.github.artsobol.fitnessapi.exception.http.ConflictException;
 import io.github.artsobol.fitnessapi.exception.http.NotFoundException;
-import io.github.artsobol.fitnessapi.feature.category.dto.request.CreateCategoryRequest;
-import io.github.artsobol.fitnessapi.feature.category.dto.request.UpdateCategoryRequest;
-import io.github.artsobol.fitnessapi.feature.category.dto.response.CategoryResponse;
-import io.github.artsobol.fitnessapi.feature.category.entity.Category;
-import io.github.artsobol.fitnessapi.feature.category.mapper.CategoryMapper;
-import io.github.artsobol.fitnessapi.feature.category.repository.CategoryRepository;
+import io.github.artsobol.fitnessapi.feature.article.dto.request.CreateCategoryRequest;
+import io.github.artsobol.fitnessapi.feature.article.dto.request.UpdateCategoryRequest;
+import io.github.artsobol.fitnessapi.feature.article.dto.response.CategoryResponse;
+import io.github.artsobol.fitnessapi.feature.article.entity.Category;
+import io.github.artsobol.fitnessapi.feature.article.mapper.CategoryMapper;
+import io.github.artsobol.fitnessapi.feature.article.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -25,9 +25,9 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryResponse> getAll() {
-        log.debug("Finding all categories");
-        return repository.findAll().stream().map(mapper::toResponse).toList();
+    public Slice<CategoryResponse> getAll(Pageable pageable) {
+        log.debug("Fetching categories page={} size={}", pageable.getPageNumber(), pageable.getPageSize());
+        return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
     @Override
     @Transactional
     public CategoryResponse create(CreateCategoryRequest request) {
-        log.info("Creating category with slug: {}", request.slug());
+        log.info("Creating category slug={}", request.slug());
         ensureSlugNotExists(request.slug());
         Category entity = Category.create(request.name(), request.slug());
         repository.save(entity);
@@ -58,15 +58,10 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
     @Override
     @Transactional
     public CategoryResponse update(String slug, UpdateCategoryRequest request) {
-        log.info("Updating category with slug: {}", slug);
+        log.info("Updating category slug={}", slug);
         Category entity = findBySlug(slug);
-        if (request.slug() != null && !entity.getSlug().equals(request.slug())) {
-            ensureSlugNotExists(request.slug());
-            entity.updateSlug(request.slug());
-        }
-        if (request.name() != null) {
-            entity.updateName(request.name());
-        }
+        validateSlugChange(entity.getSlug(), request.slug());
+        entity.applyPatch(request.name(), request.slug());
 
         return mapper.toResponse(entity);
     }
@@ -74,23 +69,29 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
     @Override
     @Transactional
     public void delete(String slug) {
-        log.info("Deleting category with slug: {}", slug);
+        log.info("Deleting category slug={}", slug);
         Category entity = findBySlug(slug);
         repository.delete(entity);
     }
 
     private Category findBySlug(String slug) {
-        log.debug("Finding category with slug: {}", slug);
+        log.debug("Fetching category slug={}", slug);
         return repository.findBySlug(slug).orElseThrow(() -> new NotFoundException("{category.slug.not.found}", slug));
     }
 
     public Category findByIdOrThrow(Long id) {
-        log.debug("Finding category with id: {}", id);
+        log.debug("Fetching category id={}", id);
         return repository.findById(id).orElseThrow(() -> new NotFoundException("{category.id.not.found}", id));
     }
 
+    private void validateSlugChange(String currentSlug, String newSlug) {
+        if (newSlug != null && !currentSlug.equals(newSlug)) {
+            ensureSlugNotExists(newSlug);
+        }
+    }
+
     private void ensureSlugNotExists(String slug) {
-        log.debug("Checking slug not exists");
+        log.debug("Checking slug uniqueness slug={}", slug);
         if (repository.existsBySlug((slug))) {
             throw new ConflictException("{category.slug.exists}", slug);
         }

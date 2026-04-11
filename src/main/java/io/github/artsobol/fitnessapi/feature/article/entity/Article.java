@@ -1,6 +1,5 @@
 package io.github.artsobol.fitnessapi.feature.article.entity;
 
-import io.github.artsobol.fitnessapi.feature.category.entity.Category;
 import io.github.artsobol.fitnessapi.feature.video.entity.Video;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,7 +7,6 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -69,6 +67,15 @@ public class Article {
         entity.updateDescription(description);
 
         return entity;
+    }
+    
+    public void applyPatch(String name, String description) {
+        if (title != null) {
+            this.updateTitle(title);
+        }
+        if (description != null) {
+            this.updateDescription(description);
+        }
     }
 
     public void updateTitle(String title) {

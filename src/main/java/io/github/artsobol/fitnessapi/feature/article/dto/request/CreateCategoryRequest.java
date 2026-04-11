@@ -1,4 +1,4 @@
-package io.github.artsobol.fitnessapi.feature.category.dto.request;
+package io.github.artsobol.fitnessapi.feature.article.dto.request;
 
 import io.github.artsobol.fitnessapi.infrastructure.validation.annotation.Slug;
 import jakarta.validation.constraints.NotBlank;

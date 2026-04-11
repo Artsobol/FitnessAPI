@@ -1,4 +1,4 @@
-package io.github.artsobol.fitnessapi.feature.category.dto.response;
+package io.github.artsobol.fitnessapi.feature.article.dto.response;
 
 public record CategoryResponse(
         Long id,

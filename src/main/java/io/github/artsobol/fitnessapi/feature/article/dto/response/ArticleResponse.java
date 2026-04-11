@@ -1,6 +1,5 @@
 package io.github.artsobol.fitnessapi.feature.article.dto.response;
 
-import io.github.artsobol.fitnessapi.feature.category.dto.response.CategoryResponse;
 import io.github.artsobol.fitnessapi.feature.video.dto.response.VideoResponse;
 
 import java.util.Set;
