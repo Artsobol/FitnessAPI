@@ -24,7 +24,7 @@ import java.time.Instant;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TrainingRating {
 
-    @EmbeddedId private TrainingFavouriteId id;
+    @EmbeddedId private TrainingUserId id;
 
     @Getter
     @MapsId("trainingId")
@@ -55,7 +55,7 @@ public class TrainingRating {
         TrainingRating entity = new TrainingRating();
         entity.user = user;
         entity.training = training;
-        entity.id = new TrainingFavouriteId(training.getId(), user.getId());
+        entity.id = new TrainingUserId(training.getId(), user.getId());
         entity.changeRating(rating);
         entity.changeComment(comment);
 
