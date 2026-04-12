@@ -25,7 +25,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public AuthResponse login(LoginRequest request, SessionMetadata meta) {
-        log.info("Received login request for username: {}", request.username());
+        log.info("Starting login username={}", request.username());
         User user = userService.findByUsername(request.username());
         ensureCredentialsValid(request.password(), user.getPasswordHash());
 
@@ -36,7 +36,7 @@ public class LoginServiceImpl implements LoginService {
         );
         AuthResponse response = authResponseFactory.create(refreshTokenRequest);
 
-        log.info("Login finished for username: {}", request.username());
+        log.info("Login finished userId={} username={}", response.user().userId(), response.user().username());
         return response;
     }
 

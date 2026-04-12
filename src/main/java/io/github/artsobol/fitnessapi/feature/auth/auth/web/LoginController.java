@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,10 +39,9 @@ public class LoginController {
         String userAgent = servletRequest.getHeader(HttpHeaders.USER_AGENT);
         String ipAddress = servletRequest.getRemoteAddr();
         DeviceInfo deviceInfo = getDeviceInfo(userAgent);
-        log.info(
-                "Received login request for user: {} from IP: {} and device: {}",
+        log.debug(
+                "Received login request username: {} device: {}",
                 loginRequest.username(),
-                ipAddress,
                 deviceInfo.device()
         );
 
@@ -50,7 +50,7 @@ public class LoginController {
                 getSessionMetadata(ipAddress, userAgent, deviceInfo)
         );
 
-        log.info("Login finished for user: {}", loginRequest.username());
+        log.debug("Login finished username={}", loginRequest.username());
         return getResponse(getResponseCookie(authResponse), authResponse);
     }
 
@@ -68,11 +68,13 @@ public class LoginController {
                 .build();
     }
 
-    private static SessionMetadata getSessionMetadata(String ipAdress, String userAgent, DeviceInfo deviceInfo) {
-        return new SessionMetadata(ipAdress, userAgent, deviceInfo.device());
+    private static SessionMetadata getSessionMetadata(String ipAddress, String userAgent, DeviceInfo deviceInfo) {
+        return new SessionMetadata(ipAddress, userAgent, deviceInfo.device());
     }
 
     private static ResponseEntity<AuthResponse> getResponse(ResponseCookie responseCookie, AuthResponse authResponse) {
-        return ResponseEntity.status(201).header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(authResponse);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .body(authResponse);
     }
 }

@@ -38,10 +38,9 @@ public class RegistrationController {
         String userAgent = servletRequest.getHeader(HttpHeaders.USER_AGENT);
         String ipAddress = servletRequest.getRemoteAddr();
         DeviceInfo deviceInfo = getDeviceInfo(userAgent);
-        log.info(
-                "Received registration request for user: {} from IP: {} and device: {}",
+        log.debug(
+                "Received registration request username={} device={}",
                 registrationRequest.username(),
-                ipAddress,
                 deviceInfo.device()
         );
 
@@ -49,7 +48,7 @@ public class RegistrationController {
                 registrationRequest,
                 getSessionMetadata(ipAddress, userAgent, deviceInfo)
         );
-        log.info("Registration finished for user: {}", registrationRequest.username());
+        log.debug("Registration finished username={}", registrationRequest.username());
 
         return getResponse(getResponseCookie(authResponse), authResponse);
     }
@@ -68,8 +67,8 @@ public class RegistrationController {
                 .build();
     }
 
-    private static SessionMetadata getSessionMetadata(String ipAdress, String userAgent, DeviceInfo deviceInfo) {
-        return new SessionMetadata(ipAdress, userAgent, deviceInfo.device());
+    private static SessionMetadata getSessionMetadata(String ipAddress, String userAgent, DeviceInfo deviceInfo) {
+        return new SessionMetadata(ipAddress, userAgent, deviceInfo.device());
     }
 
     private static ResponseEntity<AuthResponse> getResponse(ResponseCookie responseCookie, AuthResponse authResponse) {

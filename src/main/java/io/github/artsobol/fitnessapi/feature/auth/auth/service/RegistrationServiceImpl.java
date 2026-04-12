@@ -25,7 +25,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public AuthResponse register(RegistrationRequest request, SessionMetadata meta) {
-        log.info("Registration started for username: {}", request.username());
+        log.info("Starting registration username={}", request.username());
 
         CreateUserRequest userRequest = new CreateUserRequest(
                 request.username(),
@@ -45,7 +45,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         );
 
         AuthResponse response = authResponseFactory.create(refreshTokenRequest);
-        log.info("Registration finished for username: {}", request.username());
+        log.info("Registration finished userId={} username={}", response.user().userId(), request.username());
 
         return response;
     }

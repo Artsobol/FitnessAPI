@@ -18,7 +18,7 @@ public class AuthResponseFactory {
     private final RefreshTokenService refreshTokenService;
 
     public AuthResponse create(CreateRefreshTokenRequest request) {
-        log.info("Creating auth response for user: {}", request.user().getUsername());
+        log.info("Creating auth response userId={}", request.user().getId());
         User user = request.user();
         AuthResponse response = new AuthResponse(
                 accessTokenService.createAccessToken(user),
@@ -26,19 +26,19 @@ public class AuthResponseFactory {
                 new UserInfo(user.getId(), user.getUsername(), user.getRole())
         );
 
-        log.info("Auth response created for user: {}", user.getUsername());
+        log.info("Auth response created userId={}", user.getId());
         return response;
     }
 
     public AuthResponse createWithRefresh(User user, String rawRefreshToken) {
-        log.info("Creating auth response with done refresh token for user: {}", user.getUsername());
+        log.info("Creating auth response with refresh token userId={}", user.getId());
         AuthResponse response = new AuthResponse(
                 accessTokenService.createAccessToken(user),
                 rawRefreshToken,
                 new UserInfo(user.getId(), user.getEmail(), user.getRole())
         );
 
-        log.info("Auth response with done refresh token created for user: {}", user.getUsername());
+        log.info("Auth response with refresh token created userId={}", user.getId());
         return response;
     }
 }

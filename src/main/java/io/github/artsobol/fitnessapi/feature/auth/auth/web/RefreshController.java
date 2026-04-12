@@ -32,11 +32,11 @@ public class RefreshController {
     ) {
         String userAgent = servletRequest.getHeader(HttpHeaders.USER_AGENT);
         String ipAddress = servletRequest.getRemoteAddr();
-        log.info("Received refresh request from IP: {} and device: {}", ipAddress, userAgent);
+        log.debug("Receiving refresh request device={}", userAgent);
 
         RotateRefreshTokenRequest request = new RotateRefreshTokenRequest(refreshToken, ipAddress, userAgent);
         AuthResponse authResponse = service.refresh(request);
-        log.info("Refresh request successfully finished");
+        log.debug("Refresh request finished");
 
         return getResponse(getResponseCookie(authResponse), authResponse);
     }

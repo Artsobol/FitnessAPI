@@ -20,12 +20,12 @@ public class AccessTokenServiceImpl implements AccessTokenService {
 
     @Override
     public String createAccessToken(User user) {
-        log.info("Creating access token for user: {}", user.getUsername());
+        log.info("Creating access token userId={}", user.getId());
         Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority(user.getRole().name()));
         JwtSubject subject = new JwtSubject(user.getId(), authorities, user.getUsername());
         String token = jwtTokenProvider.generateToken(subject);
 
-        log.info("Access token created for user: {}", user.getUsername());
+        log.info("Access token created userId={}", user.getId());
         return token;
     }
 }

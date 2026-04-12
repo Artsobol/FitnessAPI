@@ -20,7 +20,7 @@ public class RefreshServiceImpl implements RefreshService {
     @Override
     @Transactional
     public AuthResponse refresh(RotateRefreshTokenRequest request) {
-        log.info("Received request to refresh token");
+        log.info("Requesting to refresh token");
         RefreshTokenRotationResult rotated = refreshTokenService.rotate(request);
         return authResponseFactory.createWithRefresh(rotated.user(), rotated.rawRefreshToken());
     }
