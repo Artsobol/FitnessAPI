@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +29,10 @@ public class TrainingFavouriteServiceImpl implements TrainingFavouriteService {
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingFavouriteResponse create(Long userId, Long trainingId) {
         log.info("Creating favourite training trainingId={} userId={}", trainingId, userId);
-        User user = userFinder.findById(userId);
+        User user = userFinder.findByIdOrThrow(userId);
         Training training = trainingFinder.findByIdOrThrow(trainingId);
         TrainingFavourite entity = TrainingFavourite.create(training, user);
         trainingFavouriteRepository.save(entity);
@@ -40,9 +42,10 @@ public class TrainingFavouriteServiceImpl implements TrainingFavouriteService {
     }
 
     @Override
+    @PreAuthorize("#userId == authentication.principal.userId")
     public Slice<TrainingFavouriteResponse> getAll(Long userId, Pageable pageable) {
         log.debug(
-                "Fetching training ratings userId={} page={} size={} sort={}",
+                "Fetching favourite trainings userId={} page={} size={} sort={}",
                 userId,
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
@@ -53,6 +56,7 @@ public class TrainingFavouriteServiceImpl implements TrainingFavouriteService {
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public void delete(Long userId, Long trainingId) {
         log.info("Deleting favourite training trainingId={} userId={}",  trainingId, userId);
         TrainingFavourite entity = trainingFavouriteRepository.findByUserIdAndTrainingId(userId, trainingId).orElseThrow(

@@ -5,12 +5,14 @@ import io.github.artsobol.fitnessapi.feature.training.training.dto.request.Creat
 import io.github.artsobol.fitnessapi.feature.training.training.dto.request.UpdateTrainingRequest;
 import io.github.artsobol.fitnessapi.feature.training.training.dto.response.TrainingResponse;
 import io.github.artsobol.fitnessapi.feature.training.training.service.TrainingService;
+import io.github.artsobol.fitnessapi.security.user.UserPrincipal;
 import io.github.artsobol.fitnessapi.utils.UriUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,8 +43,11 @@ public class TrainingController {
     }
 
     @PostMapping
-    public ResponseEntity<TrainingResponse> create(@RequestBody @Valid CreateTrainingRequest request) {
-        TrainingResponse response = trainingService.create(request);
+    public ResponseEntity<TrainingResponse> create(
+            @RequestBody @Valid CreateTrainingRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        TrainingResponse response = trainingService.create(request, userPrincipal.userId());
 
         return ResponseEntity.created(UriUtils.buildLocation(response.id())).body(response);
     }
@@ -52,7 +57,7 @@ public class TrainingController {
             @PathVariable @Positive Long trainingId,
             @RequestBody @Valid UpdateTrainingRequest request
     ) {
-        return trainingService.update(trainingId, request);
+        return trainingService.update(request, trainingId);
 
     }
 

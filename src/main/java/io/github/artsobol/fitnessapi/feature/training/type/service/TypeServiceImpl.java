@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +42,7 @@ public class TypeServiceImpl implements TypeService, TypeFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public TypeResponse create(CreateTypeRequest request) {
         log.info("Creating type typeSlug={}", request.slug());
         ensureSlugNotExists(request.slug());
@@ -53,12 +55,13 @@ public class TypeServiceImpl implements TypeService, TypeFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public TypeResponse update(String typeSlug, UpdateTypeRequest request) {
         log.info("Updating type typeSlug={}", typeSlug);
         Type entity = findBySlugOrThrow(typeSlug);
         String oldSlug = entity.getSlug();
         String newSlug = request.slug();
-        validateNewSlug(oldSlug, newSlug);
+        ensureSlugUniqueIfChanged(oldSlug, newSlug);
         entity.applyUpdate(request.name(), newSlug);
 
         log.info(
@@ -72,6 +75,7 @@ public class TypeServiceImpl implements TypeService, TypeFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void delete(String typeSlug) {
         log.info("Deleting type typeSlug={}", typeSlug);
         Type entity = findBySlugOrThrow(typeSlug);
@@ -87,7 +91,7 @@ public class TypeServiceImpl implements TypeService, TypeFinder {
         );
     }
 
-    private void validateNewSlug(String currentSlug, String newSlug) {
+    private void ensureSlugUniqueIfChanged(String currentSlug, String newSlug) {
         if (newSlug != null && !currentSlug.equals(newSlug)) {
             ensureSlugNotExists(newSlug);
         }

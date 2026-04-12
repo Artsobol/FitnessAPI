@@ -12,21 +12,21 @@ public interface TrainingService {
 
     Slice<TrainingResponse> getAll(Pageable pageable);
 
-    TrainingResponse create(CreateTrainingRequest request);
+    TrainingResponse create(CreateTrainingRequest request, Long authorId);
 
-    TrainingResponse update(Long id, UpdateTrainingRequest request);
+    TrainingResponse update(UpdateTrainingRequest request, Long trainingId);
 
-    TrainingResponse addExercise(Long id, Long trainingExerciseId);
+    TrainingResponse addExercise(Long trainingId, Long trainingExerciseId);
 
-    void removeExercise(Long id, Long trainingExerciseId);
+    void removeExercise(Long trainingId, Long trainingExerciseId);
 
-    TrainingResponse addType(Long id, String slug);
+    TrainingResponse addType(Long trainingId, String typeSlug);
 
-    void removeType(Long id, String slug);
+    void removeType(Long trainingId, String typeSlug);
 
-    TrainingResponse addTag(Long id, String slug);
+    TrainingResponse addTag(Long trainingId, String tagSlug);
 
-    void removeTag(Long id, String slug);
+    void removeTag(Long trainingId, String tagSlug);
 
-    void deactivate(Long id);
+    void deactivate(Long trainingId);
 }

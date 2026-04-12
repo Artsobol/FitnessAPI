@@ -4,6 +4,7 @@ import io.github.artsobol.fitnessapi.feature.training.exercise.dto.response.Trai
 import io.github.artsobol.fitnessapi.feature.training.tag.dto.response.TagResponse;
 import io.github.artsobol.fitnessapi.feature.training.training.entity.TrainingLevel;
 import io.github.artsobol.fitnessapi.feature.training.type.dto.response.TypeResponse;
+import io.github.artsobol.fitnessapi.feature.user.dto.response.UserResponse;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,6 +15,7 @@ public record TrainingResponse(
         String title,
         String description,
         List<TrainingExerciseResponse> exercises,
+        UserResponse author,
         Set<TypeResponse> types,
         Set<TagResponse> tags,
         TrainingLevel trainingLevel,

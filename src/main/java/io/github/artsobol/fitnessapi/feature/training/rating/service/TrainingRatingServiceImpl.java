@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,9 +44,10 @@ public class TrainingRatingServiceImpl implements TrainingRatingService {
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingRatingResponse create(Long trainingId, Long userId, CreateTrainingRatingRequest request) {
         log.info("Creating rating trainingId={} userId={}", trainingId, userId);
-        User user = userFinder.findById(userId);
+        User user = userFinder.findByIdOrThrow(userId);
         Training training = trainingFinder.findByIdOrThrow(trainingId);
         TrainingRating entity = TrainingRating.create(training, user, request.rating(), request.comment());
         trainingRatingRepository.save(entity);
@@ -56,6 +58,7 @@ public class TrainingRatingServiceImpl implements TrainingRatingService {
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingRatingResponse update(Long trainingId, Long userId, UpdateTrainingRatingRequest request) {
         log.info("Update rating trainingId={} userId={}", trainingId, userId);
         TrainingRating entity = findByTrainingIdAndUserId(trainingId, userId);
@@ -67,6 +70,7 @@ public class TrainingRatingServiceImpl implements TrainingRatingService {
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public void delete(Long trainingId, Long userId) {
         log.info("Deleting rating trainingId={} userId={}", trainingId, userId);
         TrainingRating entity = findByTrainingIdAndUserId(trainingId, userId);

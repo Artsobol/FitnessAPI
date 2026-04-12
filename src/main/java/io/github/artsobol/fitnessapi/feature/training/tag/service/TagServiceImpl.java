@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +42,7 @@ public class TagServiceImpl implements TagService, TagFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public TagResponse create(CreateTagRequest request) {
         log.info("Creating tag tagSlug={}", request.slug());
         ensureSlugNotExists(request.slug());
@@ -53,12 +55,13 @@ public class TagServiceImpl implements TagService, TagFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public TagResponse update(String slug, UpdateTagRequest request) {
         log.info("Updating tag tagSlug={}", slug);
         Tag entity = findBySlugOrThrow(slug);
         String currentSlug = entity.getSlug();
         String newSlug = request.slug();
-        validateNewSlug(currentSlug, newSlug);
+        ensureSlugUniqueIfChanged(currentSlug, newSlug);
         entity.applyUpdate(request.name(), newSlug);
 
         log.info("Tag updated tagId={} oldTagSlug={} newTagSlug={}", entity.getId(), currentSlug, entity.getSlug());
@@ -67,6 +70,7 @@ public class TagServiceImpl implements TagService, TagFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void delete(String slug) {
         log.info("Deleting tag tagSlug={}", slug);
         Tag entity = findBySlugOrThrow(slug);
@@ -83,7 +87,7 @@ public class TagServiceImpl implements TagService, TagFinder {
         );
     }
 
-    private void validateNewSlug(String currentSlug, String newSlug) {
+    private void ensureSlugUniqueIfChanged(String currentSlug, String newSlug) {
         if (newSlug != null && !currentSlug.equals(newSlug)) {
             ensureSlugNotExists(newSlug);
         }

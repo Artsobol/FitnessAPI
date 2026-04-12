@@ -16,10 +16,13 @@ import io.github.artsobol.fitnessapi.feature.training.training.mapper.TrainingMa
 import io.github.artsobol.fitnessapi.feature.training.training.repository.TrainingRepository;
 import io.github.artsobol.fitnessapi.feature.training.type.entity.Type;
 import io.github.artsobol.fitnessapi.feature.training.type.service.TypeFinder;
+import io.github.artsobol.fitnessapi.feature.user.entity.User;
+import io.github.artsobol.fitnessapi.feature.user.service.UserFinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +38,7 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
     private final TagFinder tagFinder;
     private final TypeFinder typeFinder;
     private final TrainingExerciseFinder trainingExerciseFinder;
+    private final UserFinder userFinder;
 
     @Override
     @Transactional(readOnly = true)
@@ -58,18 +62,21 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
 
     @Override
     @Transactional
-    public TrainingResponse create(CreateTrainingRequest request) {
-        log.info("Creating training title={}", request.title());
-        Training entity = Training.create(request.title(), request.description(), request.trainingLevel());
+    @PreAuthorize("hasAnyAuthority('TRAINER', 'ADMIN') and #authorId == authentication.principal.userId")
+    public TrainingResponse create(CreateTrainingRequest request, Long authorId) {
+        log.info("Creating training title={} authorId={}", request.title(), authorId);
+        User author = userFinder.findByIdOrThrow(authorId);
+        Training entity = Training.create(author, request.title(), request.description(), request.trainingLevel());
         trainingRepository.save(entity);
 
-        log.info("Training created id={} title={}", entity.getId(), entity.getTitle());
+        log.info("Training created trainingId={} authorId={}", entity.getId(), entity.getAuthor().getId());
         return trainingMapper.toResponse(entity);
     }
 
     @Override
     @Transactional
-    public TrainingResponse update(Long trainingId, UpdateTrainingRequest request) {
+    @PreAuthorize("hasAuthority('ADMIN') or @trainingAccess.canEdit(#trainingId, authentication)")
+    public TrainingResponse update(UpdateTrainingRequest request, Long trainingId) {
         log.info("Updating training trainingId={}", trainingId);
         Training entity = findByIdOrThrow(trainingId);
         entity.applyPatch(request.title(), request.description(), request.trainingLevel());
@@ -80,6 +87,7 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @trainingAccess.canEdit(#trainingId, authentication)")
     public TrainingResponse addExercise(Long trainingId, Long exerciseId) {
         log.info("Adding exercise trainingId={} exerciseId={}", trainingId, exerciseId);
         Training entity = findByIdOrThrow(trainingId);
@@ -92,6 +100,7 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @trainingAccess.canEdit(#trainingId, authentication)")
     public void removeExercise(Long trainingId, Long trainingExerciseId) {
         log.info("Removing exercise trainingId={} trainingExerciseId={}", trainingId, trainingExerciseId);
         ensureHasExercise(trainingExerciseId, trainingId);
@@ -104,6 +113,7 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @trainingAccess.canEdit(#trainingId, authentication)")
     public TrainingResponse addTag(Long trainingId, String tagSlug) {
         log.info("Adding tag trainingId={}, tagSlug={}", trainingId, tagSlug);
         Training entity = findByIdOrThrow(trainingId);
@@ -116,6 +126,7 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @trainingAccess.canEdit(#trainingId, authentication)")
     public void removeTag(Long trainingId, String tagSlug) {
         log.info("Removing tag trainingId={} tagSlug={}", trainingId, tagSlug);
         Training entity = findByIdOrThrow(trainingId);
@@ -127,6 +138,7 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @trainingAccess.canEdit(#trainingId, authentication)")
     public TrainingResponse addType(Long trainingId, String typeSlug) {
         log.info("Adding type trainingId={} typeSlug={}", trainingId, typeSlug);
         Training entity = findByIdOrThrow(trainingId);
@@ -139,6 +151,7 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @trainingAccess.canEdit(#trainingId, authentication)")
     public void removeType(Long trainingId, String typeSlug) {
         log.info("Removing type trainingId={} typeSlug={}", trainingId, typeSlug);
         Training entity = findByIdOrThrow(trainingId);
@@ -149,6 +162,7 @@ public class TrainingServiceImpl implements TrainingService, TrainingFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @trainingAccess.canEdit(#trainingId, authentication)")
     public void deactivate(Long trainingId) {
         log.info("Deactivating training trainingId={}", trainingId);
         Training entity = findByIdOrThrow(trainingId);

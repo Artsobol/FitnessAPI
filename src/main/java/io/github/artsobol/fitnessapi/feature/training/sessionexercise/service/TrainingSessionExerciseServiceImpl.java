@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class TrainingSessionExerciseServiceImpl implements TrainingSessionExerci
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("#userId == authentication.principal.userId")
     public Slice<TrainingSessionExerciseResponse> getAllByTrainingSession(
             Long trainingSessionId,
             Long userId,
@@ -51,12 +53,14 @@ public class TrainingSessionExerciseServiceImpl implements TrainingSessionExerci
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingSessionExerciseResponse getById(Long trainingSessionExerciseId, Long userId) {
         return trainingSessionExerciseMapper.toResponse(findByIdOrThrow(trainingSessionExerciseId, userId));
     }
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingSessionExerciseResponse start(Long trainingSessionExerciseId, Long userId) {
         log.info(
                 "Starting training session exercise trainingSessionExerciseId={} userId={}",
@@ -79,6 +83,7 @@ public class TrainingSessionExerciseServiceImpl implements TrainingSessionExerci
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingSessionExerciseResponse complete(Long trainingSessionExerciseId, Long userId) {
         log.info(
                 "Completing training session exercise trainingSessionExerciseId={} userId={}",
@@ -101,6 +106,7 @@ public class TrainingSessionExerciseServiceImpl implements TrainingSessionExerci
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingSessionExerciseResponse skip(Long trainingSessionExerciseId, Long userId) {
         log.info(
                 "Skipping training session exercise trainingSessionExerciseId={} userId={}",

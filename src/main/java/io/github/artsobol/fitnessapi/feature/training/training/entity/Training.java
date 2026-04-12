@@ -4,6 +4,7 @@ import io.github.artsobol.fitnessapi.feature.exercise.entity.Exercise;
 import io.github.artsobol.fitnessapi.feature.training.exercise.entity.TrainingExercise;
 import io.github.artsobol.fitnessapi.feature.training.tag.entity.Tag;
 import io.github.artsobol.fitnessapi.feature.training.type.entity.Type;
+import io.github.artsobol.fitnessapi.feature.user.entity.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,6 +19,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
@@ -82,6 +84,15 @@ public class Training {
     private TrainingLevel trainingLevel;
 
     @Getter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false, updatable = false)
+    private User author;
+
+    @LastModifiedDate
+    @Column(name = "last_modified_by")
+    private Long lastModifiedBy;
+
+    @Getter
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
@@ -96,11 +107,13 @@ public class Training {
     private Instant updatedAt;
 
     public static Training create(
+            User author,
             String title,
             String description,
             TrainingLevel trainingLevel
     ) {
         Training entity = new Training();
+        entity.setAuthor(author);
         entity.updateTitle(title);
         entity.updateDescription(description);
         entity.setTrainingLevel(trainingLevel);
@@ -198,6 +211,13 @@ public class Training {
             throw new IllegalArgumentException("training Level must not be null");
         }
         this.trainingLevel = trainingLevel;
+    }
+
+    private void setAuthor(User author) {
+        if (author == null) {
+            throw new IllegalArgumentException("author must not be null");
+        }
+        this.author = author;
     }
 
     private static void ensureExerciseNotNull(Exercise exercise) {

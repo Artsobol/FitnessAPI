@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ public class TrainingSessionServiceImpl implements TrainingSessionService, Train
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("#userId == authentication.principal.userId")
     public Slice<TrainingSessionResponse> getAllByUser(Long userId, Pageable pageable) {
         log.debug(
                 "Fetching training sessions userId={} page={} size={} sort={}",
@@ -43,17 +45,19 @@ public class TrainingSessionServiceImpl implements TrainingSessionService, Train
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingSessionResponse getById(Long sessionId, Long userId) {
         return trainingSessionMapper.toResponse(findByIdOrThrow(sessionId, userId));
     }
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingSessionResponse create(Long trainingId, Long userId) {
         log.info("Creating training session trainingId={} userId={}", trainingId, userId);
         ensureNoActiveSession(trainingId, userId);
 
-        User user = userFinder.findById(userId);
+        User user = userFinder.findByIdOrThrow(userId);
         Training training = trainingFinder.findByIdOrThrow(trainingId);
 
         TrainingSession entity = TrainingSession.create(user, training);
@@ -65,6 +69,7 @@ public class TrainingSessionServiceImpl implements TrainingSessionService, Train
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingSessionResponse complete(Long sessionId, Long userId) {
         log.info("Completing training session sessionId={} userId={}", sessionId, userId);
         TrainingSession entity = findByIdOrThrow(sessionId, userId);
@@ -79,6 +84,7 @@ public class TrainingSessionServiceImpl implements TrainingSessionService, Train
 
     @Override
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public TrainingSessionResponse abandon(Long sessionId, Long userId) {
         log.info("Abandoning training session sessionId={} userId={}", sessionId, userId);
         TrainingSession entity = findByIdOrThrow(sessionId, userId);
