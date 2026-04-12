@@ -28,21 +28,21 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     @Transactional
     public String createRefreshToken(CreateRefreshTokenRequest request) {
-        log.info("Start creating refresh token for user: {}", request.user().getUsername());
+        log.info("Creating refresh token userId={}", request.user().getId());
         Long id = request.user().getId();
         long activeSessions = refreshTokenRepository.countActiveSessions(id);
         ensureHasSessions(id, activeSessions);
         CreatedRefreshToken encoded = encoder.create(request);
         refreshTokenRepository.save(encoded.refreshToken());
 
-        log.info("Refresh token created for user: {}", request.user().getUsername());
+        log.info("Refresh token created userId={}", request.user().getId());
         return encoded.rawToken();
     }
 
     @Override
     @Transactional
     public RefreshTokenRotationResult rotate(RotateRefreshTokenRequest request) {
-        log.info("Start rotating refresh token");
+        log.info("Rotating refresh token");
         String hash = encoder.hash(request.rawRefreshToken());
         RefreshToken token = refreshTokenRepository.findByTokenHash(hash)
                 .orElseThrow(() -> new AuthenticationException("auth.refresh.invalid"));
