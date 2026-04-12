@@ -6,11 +6,11 @@ import io.github.artsobol.fitnessapi.feature.video.dto.response.VideoResponse;
 
 public interface VideoService {
 
-    VideoResponse getVideoById(Long id);
+    VideoResponse getById(Long id);
 
-    VideoResponse createVideo(CreateVideoRequest request);
+    VideoResponse create(CreateVideoRequest request);
 
-    VideoResponse updateVideo(Long id, UpdateVideoRequest request);
+    VideoResponse update(Long id, UpdateVideoRequest request);
 
-    void deleteVideo(Long id);
+    void delete(Long id);
 }

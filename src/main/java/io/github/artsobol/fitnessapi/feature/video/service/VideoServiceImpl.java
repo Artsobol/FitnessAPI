@@ -10,6 +10,7 @@ import io.github.artsobol.fitnessapi.feature.video.mapper.VideoMapper;
 import io.github.artsobol.fitnessapi.feature.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,15 +24,16 @@ public class VideoServiceImpl implements VideoService, VideoFinder {
 
     @Override
     @Transactional(readOnly = true)
-    public VideoResponse getVideoById(Long id) {
+    public VideoResponse getById(Long id) {
         Video entity = findByIdOrThrow(id);
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
-    public VideoResponse createVideo(CreateVideoRequest request) {
-        log.info("Creating video");
+    @PreAuthorize("hasAnyAuthority('TRAINER', 'ADMIN')")
+    public VideoResponse create(CreateVideoRequest request) {
+        log.info("Creating video title={}", request.title());
         Video entity = Video.create(request.url(), request.title());
         repository.save(entity);
 
@@ -41,12 +43,13 @@ public class VideoServiceImpl implements VideoService, VideoFinder {
 
     @Override
     @Transactional
-    public VideoResponse updateVideo(Long id, UpdateVideoRequest request) {
-        log.info("Updating video videoId={}", id);
-        Video entity = findByIdOrThrow(id);
+    @PreAuthorize("hasAnyAuthority('TRAINER', 'ADMIN')")
+    public VideoResponse update(Long videoId, UpdateVideoRequest request) {
+        log.info("Updating video videoId={}", videoId);
+        Video entity = findByIdOrThrow(videoId);
         String currentUrl = entity.getUrl();
         String newUrl = request.url();
-        validateNewUrl(currentUrl, newUrl);
+        ensureUrlUniqueIfChanged(currentUrl, newUrl);
         entity.applyPatch(request.title(), newUrl);
 
         log.info("Video updated videoId={} oldVideoUrl={} newVideoUrl={}", entity.getId(), currentUrl, entity.getUrl());
@@ -55,7 +58,8 @@ public class VideoServiceImpl implements VideoService, VideoFinder {
 
     @Override
     @Transactional
-    public void deleteVideo(Long id) {
+    @PreAuthorize("hasAnyAuthority('TRAINER', 'ADMIN')")
+    public void delete(Long id) {
         log.info("Deleting video videoId={}", id);
         Video entity = findByIdOrThrow(id);
         repository.delete(entity);
@@ -69,7 +73,7 @@ public class VideoServiceImpl implements VideoService, VideoFinder {
         );
     }
 
-    private void validateNewUrl(String currentUrl, String newUrl) {
+    private void ensureUrlUniqueIfChanged(String currentUrl, String newUrl) {
         if (newUrl != null && !currentUrl.equals(newUrl)) {
             ensureUrlNotExists(newUrl);
         }

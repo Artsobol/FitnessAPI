@@ -29,13 +29,13 @@ public class VideoController {
 
     @GetMapping("/{videoId}")
     public VideoResponse get(@PathVariable @Positive Long videoId) {
-        return service.getVideoById(videoId);
+        return service.getById(videoId);
     }
 
 
     @PostMapping
     public ResponseEntity<VideoResponse> create(@RequestBody @Valid CreateVideoRequest request) {
-        VideoResponse response = service.createVideo(request);
+        VideoResponse response = service.create(request);
 
         return ResponseEntity.created(UriUtils.buildLocation(response.id())).body(response);
     }
@@ -43,13 +43,13 @@ public class VideoController {
 
     @PatchMapping("/{videoId}")
     public VideoResponse update(@PathVariable @Positive Long videoId, @RequestBody @Valid UpdateVideoRequest request) {
-        return service.updateVideo(videoId, request);
+        return service.update(videoId, request);
     }
 
 
     @DeleteMapping("/{videoId}")
     public ResponseEntity<Void> delete(@PathVariable @Positive Long videoId) {
-        service.deleteVideo(videoId);
+        service.delete(videoId);
 
         return ResponseEntity.noContent().build();
     }
