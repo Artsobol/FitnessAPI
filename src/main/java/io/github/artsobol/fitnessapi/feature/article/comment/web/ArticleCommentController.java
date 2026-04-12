@@ -1,14 +1,18 @@
 package io.github.artsobol.fitnessapi.feature.article.comment.web;
 
+import io.github.artsobol.fitnessapi.api.common.dto.SliceResponse;
 import io.github.artsobol.fitnessapi.feature.article.comment.dto.request.CreateCommentRequest;
 import io.github.artsobol.fitnessapi.feature.article.comment.dto.response.CommentResponse;
 import io.github.artsobol.fitnessapi.feature.article.comment.service.CommentService;
 import io.github.artsobol.fitnessapi.security.user.UserPrincipal;
+import io.github.artsobol.fitnessapi.utils.UriUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,22 +20,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
+@Validated
 @RestController
-@RequestMapping("api/v1/articles/{articleId}/comments")
+@RequestMapping("/articles/{articleId}/comments")
 @RequiredArgsConstructor
 public class ArticleCommentController {
 
     private final CommentService service;
 
     @GetMapping
-    public ResponseEntity<List<CommentResponse>> getArticleComments(
-            @PathVariable Long articleId
+    public SliceResponse<CommentResponse> getArticleComments(@PathVariable @Positive Long articleId, Pageable pageable
     ) {
-        List<CommentResponse> response = service.getArticleComments(articleId);
-
-        return ResponseEntity.ok(response);
+        return SliceResponse.from(service.getArticleComments(articleId, pageable));
     }
 
     @PostMapping
@@ -42,6 +42,6 @@ public class ArticleCommentController {
     ) {
         CommentResponse response = service.createComment(principal.userId(), articleId, request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.created(UriUtils.buildLocation(response.id())).body(response);
     }
 }

@@ -14,11 +14,10 @@ import io.github.artsobol.fitnessapi.feature.user.entity.User;
 import io.github.artsobol.fitnessapi.feature.user.service.UserFinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,51 +32,60 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentResponse createComment(Long userId, Long articleId, CreateCommentRequest request) {
-        log.info("Creating comment for article with id: {} and user id: {}", userId, articleId);
+        log.info("Creating comment articleId={} userId={}", articleId, userId);
         User user = userFinder.findById(userId);
         Article article = articleFinder.findByIdOrThrow(articleId);
 
         Comment entity = Comment.create(user, article, request.comment());
         repository.save(entity);
 
+        log.info("Comment created commentId={} articleId={} userId={}", entity.getId(), article.getId(), user.getId());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
     public CommentResponse updateComment(Long commentId, Long userId, UpdateCommentRequest request) {
+        log.info("Updating comment commentId={} userId={}", commentId, userId);
         Comment entity = getById(commentId);
         ensureIsOwner(commentId, userId);
         entity.updateComment(request.comment());
 
+        log.info("Comment updated commentId={} userId={}", entity.getId(), userId);
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CommentResponse> getArticleComments(Long articleId) {
-        log.debug("Finding comment for article with id: {}", articleId);
-        return repository.findByArticleIdAndIsActiveTrue(articleId)
-                .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+    public Slice<CommentResponse> getArticleComments(Long articleId, Pageable pageable) {
+        log.debug(
+                "Fetching comment articleId={} page={} size={} sort={}",
+                articleId,
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort()
+        );
+        return repository.findByArticleIdAndIsActiveTrue(articleId, pageable).map(mapper::toResponse);
     }
 
     @Override
     @Transactional
     public void deactivateComment(Long commentId, Long userId) {
+        log.info("Deactivating comment commentId={} userId={}", commentId, userId);
         ensureIsOwner(commentId, userId);
         Comment entity = getById(commentId);
         entity.deactivate();
+        log.info("Comment deactivated commentId={} userId={}", entity.getId(), userId);
     }
 
-    private Comment getById(Long id) {
-        log.debug("Finding comment with id: {}", id);
-        return repository.findByIdAndIsActiveTrue(id)
-                .orElseThrow(() -> new NotFoundException("{comment.id.not.found}", id));
+    private Comment getById(Long commentId) {
+        log.debug("Fetching comment commentId={}", commentId);
+        return repository.findByIdAndIsActiveTrue(commentId)
+                .orElseThrow(() -> new NotFoundException("{comment.id.not.found}", commentId));
     }
 
     private void ensureIsOwner(Long commentId, Long userId) {
+        log.debug("Checking comment ownership commentId={}, userId={}", commentId, userId);
         if (!repository.existsByIdAndUserId(commentId, userId)) {
             throw new ForbiddenException("{comment.wrong.owner.update}", commentId, userId);
         }
