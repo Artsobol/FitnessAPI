@@ -6,8 +6,6 @@ import io.github.artsobol.fitnessapi.feature.article.comment.dto.response.Commen
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
-import java.util.List;
-
 public interface CommentService {
 
     CommentResponse createComment(Long userId, Long articleId, CreateCommentRequest request);

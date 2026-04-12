@@ -26,7 +26,12 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
     @Override
     @Transactional(readOnly = true)
     public Slice<CategoryResponse> getAll(Pageable pageable) {
-        log.debug("Fetching categories page={} size={}", pageable.getPageNumber(), pageable.getPageSize());
+        log.debug(
+                "Fetching categories page={} size={} sort={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort()
+        );
         return repository.findAll(pageable).map(mapper::toResponse);
     }
 
@@ -47,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
     @Override
     @Transactional
     public CategoryResponse create(CreateCategoryRequest request) {
-        log.info("Creating category slug={}", request.slug());
+        log.info("Creating category categorySlug={}", request.slug());
         ensureSlugNotExists(request.slug());
         Category entity = Category.create(request.name(), request.slug());
         repository.save(entity);
@@ -57,31 +62,32 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
 
     @Override
     @Transactional
-    public CategoryResponse update(String slug, UpdateCategoryRequest request) {
-        log.info("Updating category slug={}", slug);
-        Category entity = findBySlug(slug);
+    public CategoryResponse update(String categorySlug, UpdateCategoryRequest request) {
+        log.info("Updating category categorySLug={}", categorySlug);
+        Category entity = findBySlug(categorySlug);
         validateSlugChange(entity.getSlug(), request.slug());
         entity.applyPatch(request.name(), request.slug());
 
+        log.info("Category updated categoryId={} categorySlug={}", entity.getId(), entity.getSlug());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
-    public void delete(String slug) {
-        log.info("Deleting category slug={}", slug);
-        Category entity = findBySlug(slug);
+    public void delete(String categorySlug) {
+        log.info("Deleting category categorySlug={}", categorySlug);
+        Category entity = findBySlug(categorySlug);
         repository.delete(entity);
     }
 
-    private Category findBySlug(String slug) {
-        log.debug("Fetching category slug={}", slug);
-        return repository.findBySlug(slug).orElseThrow(() -> new NotFoundException("{category.slug.not.found}", slug));
+    private Category findBySlug(String categorySlug) {
+        log.debug("Fetching category categorySlug={}", categorySlug);
+        return repository.findBySlug(categorySlug).orElseThrow(() -> new NotFoundException("{category.slug.not.found}", categorySlug));
     }
 
-    public Category findByIdOrThrow(Long id) {
-        log.debug("Fetching category id={}", id);
-        return repository.findById(id).orElseThrow(() -> new NotFoundException("{category.id.not.found}", id));
+    public Category findByIdOrThrow(Long categoryId) {
+        log.debug("Fetching category categoryId={}", categoryId);
+        return repository.findById(categoryId).orElseThrow(() -> new NotFoundException("{category.id.not.found}", categoryId));
     }
 
     private void validateSlugChange(String currentSlug, String newSlug) {
@@ -90,10 +96,10 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
         }
     }
 
-    private void ensureSlugNotExists(String slug) {
-        log.debug("Checking slug uniqueness slug={}", slug);
-        if (repository.existsBySlug((slug))) {
-            throw new ConflictException("{category.slug.exists}", slug);
+    private void ensureSlugNotExists(String categorySlug) {
+        log.debug("Checking slug uniqueness categorySlug={}", categorySlug);
+        if (repository.existsBySlug((categorySlug))) {
+            throw new ConflictException("{category.slug.exists}", categorySlug);
         }
     }
 }

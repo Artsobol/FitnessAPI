@@ -37,7 +37,12 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
     @Override
     @Transactional(readOnly = true)
     public Slice<ArticleResponse> getAll(Pageable pageable) {
-        log.debug("Fetching articles page={} size={}", pageable.getPageNumber(), pageable.getPageSize());
+        log.debug(
+                "Fetching articles page={} size={} sort={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort()
+        );
         return repository.findAll(pageable).map(mapper::toResponse);
     }
 
@@ -48,18 +53,18 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
         Article entity = Article.create(request.title(), request.description());
         repository.save(entity);
 
-        log.info("Created article id={}", entity.getId());
+        log.info("Created article articleId={}", entity.getId());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
-    public ArticleResponse update(Long id, UpdateArticleRequest request) {
-        log.info("Updating article id={}", id);
-        Article entity = findByIdOrThrow(id);
+    public ArticleResponse update(Long articleId, UpdateArticleRequest request) {
+        log.info("Updating article articleId={}", articleId);
+        Article entity = findByIdOrThrow(articleId);
         entity.applyPatch(request.title(), request.description());
 
-        log.info("Article updated id={}", id);
+        log.info("Article updated articleId={}", articleId);
         return mapper.toResponse(entity);
     }
 
@@ -109,16 +114,17 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
 
     @Override
     @Transactional
-    public void delete(Long id) {
-        log.info("Deleting article id={}", id);
-        Article entity = findByIdOrThrow(id);
+    public void delete(Long articleId) {
+        log.info("Deleting article articleId={}", articleId);
+        Article entity = findByIdOrThrow(articleId);
         repository.delete(entity);
-        log.info("Article deleted id={}", id);
+        log.info("Article deleted articleId={}", articleId);
     }
 
     @Override
-    public Article findByIdOrThrow(Long id) {
-        log.debug("Fetching article id={}", id);
-        return repository.findById(id).orElseThrow(() -> new NotFoundException("{article.id.not.found}", id));
+    public Article findByIdOrThrow(Long articleId) {
+        log.debug("Fetching article articleId={}", articleId);
+        return repository.findById(articleId)
+                .orElseThrow(() -> new NotFoundException("{article.id.not.found}", articleId));
     }
 }
