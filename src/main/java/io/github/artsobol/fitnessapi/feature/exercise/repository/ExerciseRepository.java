@@ -9,7 +9,9 @@ import java.util.Optional;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 
-    Optional<Exercise> findByIdAndIsActiveTrue(Long id);
+    Optional<Exercise> findByIdAndIsActiveTrue(Long exerciseId);
 
     Slice<Exercise> findByIsActiveTrue(Pageable pageable);
+
+    boolean existsByIdAndAuthorId(Long exerciseId, Long authorId);
 }

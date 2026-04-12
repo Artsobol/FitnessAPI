@@ -7,12 +7,15 @@ import io.github.artsobol.fitnessapi.feature.exercise.dto.response.ExerciseRespo
 import io.github.artsobol.fitnessapi.feature.exercise.entity.Exercise;
 import io.github.artsobol.fitnessapi.feature.exercise.mapper.ExerciseMapper;
 import io.github.artsobol.fitnessapi.feature.exercise.repository.ExerciseRepository;
+import io.github.artsobol.fitnessapi.feature.user.entity.User;
+import io.github.artsobol.fitnessapi.feature.user.service.UserFinder;
 import io.github.artsobol.fitnessapi.feature.video.entity.Video;
 import io.github.artsobol.fitnessapi.feature.video.service.VideoFinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,7 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
     private final ExerciseRepository repository;
     private final ExerciseMapper mapper;
     private final VideoFinder videoFinder;
+    private final UserFinder userFinder;
 
     @Override
     @Transactional(readOnly = true)
@@ -47,9 +51,12 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
 
     @Override
     @Transactional
-    public ExerciseResponse create(CreateExerciseRequest request) {
-        log.info("Creating exercise exerciseTitle={}", request.title());
+    @PreAuthorize("hasAnyAuthority('TRAINER', 'ADMIN') and #authorId == authentication.principal.userId")
+    public ExerciseResponse create(CreateExerciseRequest request, Long authorId) {
+        log.info("Creating exercise exerciseTitle={} authorId={}", request.title(), authorId);
+        User author = userFinder.findByIdOrThrow(authorId);
         Exercise entity = Exercise.create(
+                author,
                 request.title(),
                 request.description(),
                 request.muscleGroup(),
@@ -57,12 +64,13 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
         );
         repository.save(entity);
 
-        log.info("Exercise created exerciseId={}", entity.getId());
+        log.info("Exercise created exerciseId={} authorId={}", entity.getId(), entity.getAuthor().getId());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyAuthority('ADMIN') or @exerciseAccess.canEdit(#exerciseId, authentication)")
     public ExerciseResponse update(Long exerciseId, UpdateExerciseRequest request) {
         log.info("Updating exercise exerciseId={}", exerciseId);
         Exercise entity = findByIdOrThrow(exerciseId);
@@ -74,6 +82,7 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyAuthority('ADMIN') or @exerciseAccess.canEdit(#exerciseId, authentication)")
     public ExerciseResponse addVideo(Long exerciseId, Long videoId) {
         log.info("Adding video exerciseId={} videoId={}", exerciseId, videoId);
         Exercise entity = findByIdOrThrow(exerciseId);
@@ -86,6 +95,7 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyAuthority('ADMIN') or @exerciseAccess.canEdit(#exerciseId, authentication)")
     public void removeVideo(Long exerciseId, Long videoId) {
         log.info("Removing video exerciseId={} videoId={}", exerciseId, videoId);
         Exercise entity = findByIdOrThrow(exerciseId);
@@ -95,6 +105,7 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyAuthority('ADMIN') or @exerciseAccess.canEdit(#exerciseId, authentication)")
     public void deactivate(Long exerciseId) {
         log.info("Deactivating exercise exerciseId={}", exerciseId);
         Exercise entity = findByIdOrThrow(exerciseId);

@@ -1,6 +1,7 @@
 package io.github.artsobol.fitnessapi.feature.exercise.entity;
 
 import io.github.artsobol.fitnessapi.feature.training.training.entity.TrainingLevel;
+import io.github.artsobol.fitnessapi.feature.user.entity.User;
 import io.github.artsobol.fitnessapi.feature.video.entity.Video;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,11 +16,13 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -70,6 +73,15 @@ public class Exercise {
     private boolean isActive = true;
 
     @Getter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private User author;
+
+    @LastModifiedBy
+    @Column(name = "last_modified_by")
+    private Long lastModifiedBy;
+
+    @Getter
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -80,12 +92,14 @@ public class Exercise {
     private Instant updatedAt;
 
     public static Exercise create(
+            User author,
             String title,
             String description,
             MuscleGroup muscleGroup,
             TrainingLevel trainingLevel
     ) {
         Exercise entity = new Exercise();
+        entity.setAuthor(author);
         entity.updateTitle(title);
         entity.updateDescription(description);
         entity.setMuscleGroup(muscleGroup);
@@ -149,6 +163,13 @@ public class Exercise {
             throw new IllegalArgumentException("training Level must not be null");
         }
         this.trainingLevel = trainingLevel;
+    }
+
+    private void setAuthor(User author) {
+        if (author == null) {
+            throw new IllegalArgumentException("author must not be null");
+        }
+        this.author = author;
     }
 
     private static void ensureVideoNotNull(Video video) {

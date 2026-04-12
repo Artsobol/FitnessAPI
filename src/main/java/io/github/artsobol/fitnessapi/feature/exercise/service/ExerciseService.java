@@ -14,7 +14,7 @@ public interface ExerciseService {
 
     Slice<ExerciseResponse> getAll(Pageable pageable);
 
-    ExerciseResponse create(CreateExerciseRequest request);
+    ExerciseResponse create(CreateExerciseRequest request, Long authorId);
 
     ExerciseResponse update(Long id, UpdateExerciseRequest request);
 

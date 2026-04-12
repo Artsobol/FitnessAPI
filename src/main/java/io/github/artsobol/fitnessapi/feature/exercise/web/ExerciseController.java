@@ -5,12 +5,14 @@ import io.github.artsobol.fitnessapi.feature.exercise.dto.request.CreateExercise
 import io.github.artsobol.fitnessapi.feature.exercise.dto.request.UpdateExerciseRequest;
 import io.github.artsobol.fitnessapi.feature.exercise.dto.response.ExerciseResponse;
 import io.github.artsobol.fitnessapi.feature.exercise.service.ExerciseService;
+import io.github.artsobol.fitnessapi.security.user.UserPrincipal;
 import io.github.artsobol.fitnessapi.utils.UriUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,8 +43,11 @@ public class ExerciseController {
     }
 
     @PostMapping
-    public ResponseEntity<ExerciseResponse> create(@RequestBody @Valid CreateExerciseRequest request) {
-        ExerciseResponse response = exerciseService.create(request);
+    public ResponseEntity<ExerciseResponse> create(
+            @RequestBody @Valid CreateExerciseRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        ExerciseResponse response = exerciseService.create(request, userPrincipal.userId());
 
         return ResponseEntity.created(UriUtils.buildLocation(response.id())).body(response);
     }
