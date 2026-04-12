@@ -1,6 +1,6 @@
 package io.github.artsobol.fitnessapi.feature.exercise.entity;
 
-import io.github.artsobol.fitnessapi.feature.training.entity.TrainingLevel;
+import io.github.artsobol.fitnessapi.feature.training.training.entity.TrainingLevel;
 import io.github.artsobol.fitnessapi.feature.video.entity.Video;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
