@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/auth/refresh")
+@RequestMapping("/auth/refresh")
 @RequiredArgsConstructor
 public class RefreshController {
 
