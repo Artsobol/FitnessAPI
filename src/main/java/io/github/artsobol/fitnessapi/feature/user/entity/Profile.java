@@ -61,6 +61,15 @@ public class Profile {
         return entity;
     }
 
+    public void applyPatch(String firstName, String lastName) {
+        if (firstName != null) {
+            this.updateFirstName(firstName);
+        }
+        if (lastName != null) {
+            this.updateLastName(lastName);
+        }
+    }
+
     public void updateFirstName(String firstName) {
         if (firstName == null || firstName.isBlank()) {
             throw new IllegalArgumentException("FirstName is blank");

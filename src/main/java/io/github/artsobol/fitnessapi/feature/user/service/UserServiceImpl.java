@@ -11,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,7 +21,7 @@ public class UserServiceImpl implements UserService, UserFinder {
     @Override
     @Transactional
     public User createUser(CreateUserRequest request) {
-        log.info("Creating user with username: {}", request.username());
+        log.info("Creating user username={}", request.username());
         ensureUniqueUsername(request.username());
         ensureUniqueEmail(request.email());
 
@@ -31,33 +29,33 @@ public class UserServiceImpl implements UserService, UserFinder {
         entity.changeRole(Role.USER);
         userRepository.save(entity);
 
-        log.info("User created with username: {}", entity.getUsername());
+        log.info("User created userId={} username={}", entity.getId(), entity.getUsername());
         return entity;
     }
 
     @Override
-    public User findByUsername(String username) {
-        log.debug("Finding user by username: {}", username);
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new NotFoundException("user.not.found")
-        );
-    }
-
-    @Override
     public User findById(Long userId) {
-        log.debug("Finding user by id: {}", userId);
+        log.debug("Fetching user userId={}", userId);
         return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("user.not.found"));
     }
 
     private void ensureUniqueEmail(String email) {
-        log.debug("Checking if email: {} is unique", email);
+        log.debug("Checking user uniqueness userEmail={}", email);
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("user.email.exists");
         }
     }
 
+    @Override
+    public User findByUsername(String username) {
+        log.debug("Fetching user username={}", username);
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new NotFoundException("user.not.found")
+        );
+    }
+
     private void ensureUniqueUsername(String username) {
-        log.debug("Checking if username: {} is unique", username);
+        log.debug("Checking user uniqueness username={}", username);
         if (userRepository.existsByUsername(username)) {
             throw new ConflictException("user.username.exists");
         }

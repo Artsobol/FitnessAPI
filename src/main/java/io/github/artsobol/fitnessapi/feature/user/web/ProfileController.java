@@ -26,17 +26,13 @@ public class ProfileController {
     private final ProfileService service;
 
     @GetMapping("/me")
-    public ResponseEntity<ProfileResponse> getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        ProfileResponse response = service.getProfileByUserId(userPrincipal.userId());
-
-        return ResponseEntity.ok(response);
+    public ProfileResponse getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return service.getProfileByUserId(userPrincipal.userId());
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<ProfileResponse> getProfileByUsername(@PathVariable String username) {
-        ProfileResponse response = service.getProfileByUsername(username);
-
-        return ResponseEntity.ok(response);
+    public ProfileResponse getProfileByUsername(@PathVariable String username) {
+        return service.getProfileByUsername(username);
     }
 
     @PostMapping
@@ -50,12 +46,10 @@ public class ProfileController {
     }
 
     @PatchMapping
-    public ResponseEntity<ProfileResponse> updateProfile(
+    public ProfileResponse updateProfile(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody @Valid UpdateProfileRequest request
     ) {
-        ProfileResponse response = service.updateProfile(userPrincipal.userId(), request);
-
-        return ResponseEntity.ok(response);
+        return service.updateProfile(userPrincipal.userId(), request);
     }
 }
