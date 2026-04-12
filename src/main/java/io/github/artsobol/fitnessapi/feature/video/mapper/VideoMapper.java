@@ -11,8 +11,8 @@ import org.mapstruct.Mapping;
 public interface VideoMapper {
 
     @BeanMapping(ignoreByDefault = true)
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "title", target = "title")
-    @Mapping(source = "url", target = "url")
+    @Mapping(target = "id")
+    @Mapping(target = "title")
+    @Mapping(target = "url")
     VideoResponse toResponse(Video entity);
 }

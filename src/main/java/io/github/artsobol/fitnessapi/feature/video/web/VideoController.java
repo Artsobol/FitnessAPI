@@ -4,10 +4,12 @@ import io.github.artsobol.fitnessapi.feature.video.dto.request.CreateVideoReques
 import io.github.artsobol.fitnessapi.feature.video.dto.request.UpdateVideoRequest;
 import io.github.artsobol.fitnessapi.feature.video.dto.response.VideoResponse;
 import io.github.artsobol.fitnessapi.feature.video.service.VideoService;
+import io.github.artsobol.fitnessapi.utils.UriUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,18 +19,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
-@RequestMapping("/api/v1/videos")
+@RequestMapping("/videos")
 @RequiredArgsConstructor
 public class VideoController {
 
     private final VideoService service;
 
     @GetMapping("/{videoId}")
-    public ResponseEntity<VideoResponse> get(@PathVariable Long videoId) {
-        VideoResponse response = service.getVideoById(videoId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public VideoResponse get(@PathVariable @Positive Long videoId) {
+        return service.getVideoById(videoId);
     }
 
 
@@ -36,20 +37,18 @@ public class VideoController {
     public ResponseEntity<VideoResponse> create(@RequestBody @Valid CreateVideoRequest request) {
         VideoResponse response = service.createVideo(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.created(UriUtils.buildLocation(response.id())).body(response);
     }
 
 
     @PatchMapping("/{videoId}")
-    public ResponseEntity<VideoResponse> update(@PathVariable Long videoId, @RequestBody @Valid UpdateVideoRequest request) {
-        VideoResponse response = service.updateVideo(videoId, request);
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public VideoResponse update(@PathVariable @Positive Long videoId, @RequestBody @Valid UpdateVideoRequest request) {
+        return service.updateVideo(videoId, request);
     }
 
 
     @DeleteMapping("/{videoId}")
-    public ResponseEntity<Void> delete(@PathVariable Long videoId) {
+    public ResponseEntity<Void> delete(@PathVariable @Positive Long videoId) {
         service.deleteVideo(videoId);
 
         return ResponseEntity.noContent().build();

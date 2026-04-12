@@ -34,44 +34,49 @@ public class VideoServiceImpl implements VideoService, VideoFinder {
         log.info("Creating video");
         Video entity = Video.create(request.url(), request.title());
         repository.save(entity);
-        log.info("Video was creating with id: {}", entity.getId());
 
+        log.info("Video created videoId={}", entity.getId());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
     public VideoResponse updateVideo(Long id, UpdateVideoRequest request) {
-        log.info("Updating video with id: {}", id);
+        log.info("Updating video videoId={}", id);
         Video entity = findByIdOrThrow(id);
-        if (request.url() != null && !request.url().equals(entity.getUrl())) {
-            ensureUrlNotExists(request.url());
-            log.debug("Video with id: {} change url from: {} - to: {}", id, entity.getUrl(), request.url());
-            entity.changeUrl(request.url());
-        }
-        if (request.title() != null) {
-            entity.changeTitle(request.title());
-            log.debug("Video with id: {} change title from: {} - to: {}", id, entity.getTitle(), request.title());
-        }
+        String currentUrl = entity.getUrl();
+        String newUrl = request.url();
+        validateNewUrl(currentUrl, newUrl);
+        entity.applyPatch(request.title(), newUrl);
+
+        log.info("Video updated videoId={} oldVideoUrl={} newVideoUrl={}", entity.getId(), currentUrl, entity.getUrl());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
     public void deleteVideo(Long id) {
-        log.info("Deleting video with id: {}", id);
+        log.info("Deleting video videoId={}", id);
         Video entity = findByIdOrThrow(id);
         repository.delete(entity);
+        log.info("Video deleted videoId={}", entity.getId());
     }
 
     public Video findByIdOrThrow(Long id) {
-        log.debug("Finding video with id: {}", id);
+        log.debug("Fetching video videoId={}", id);
         return repository.findById(id).orElseThrow(
                 () -> new NotFoundException("{video.not.found}", id)
         );
     }
 
+    private void validateNewUrl(String currentUrl, String newUrl) {
+        if (newUrl != null && !currentUrl.equals(newUrl)) {
+            ensureUrlNotExists(newUrl);
+        }
+    }
+
     private void ensureUrlNotExists(String url) {
+        log.debug("Checking video uniqueness videoUrl={}", url);
         if (repository.existsByUrl(url)) {
             throw new ConflictException("{video.url.exists}", url);
         }

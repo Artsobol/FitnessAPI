@@ -51,6 +51,15 @@ public class Video {
         return entity;
     }
 
+    public void applyPatch(String title, String url) {
+        if (url != null) {
+            this.changeUrl(url);
+        }
+        if (title != null) {
+            this.changeTitle(title);
+        }
+    }
+
     public void changeTitle(String title) {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("title must not be blank");
