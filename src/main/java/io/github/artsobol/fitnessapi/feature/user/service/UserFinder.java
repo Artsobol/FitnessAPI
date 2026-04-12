@@ -6,5 +6,5 @@ public interface UserFinder {
 
     User findByUsername(String username);
 
-    User findById(Long id);
+    User findByIdOrThrow(Long id);
 }

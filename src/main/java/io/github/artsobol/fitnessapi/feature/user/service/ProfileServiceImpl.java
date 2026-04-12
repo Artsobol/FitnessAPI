@@ -26,14 +26,14 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAnyAuthority('USER')")
+    @PreAuthorize("isAuthenticated()")
     public ProfileResponse getProfileByUserId(Long userId) {
-        return profileMapper.toResponse(getProfileByUserId(userFinder.findById(userId)));
+        return profileMapper.toResponse(getProfileByUserId(userFinder.findByIdOrThrow(userId)));
     }
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAnyAuthority('USER')")
+    @PreAuthorize("isAuthenticated()")
     public ProfileResponse getProfileByUsername(String username) {
         log.debug("Fetching profile username={}", username);
         User user = userFinder.findByUsername(username);
@@ -43,12 +43,12 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasAnyAuthority('USER')")
+    @PreAuthorize("#userId == authentication.principal.userId")
     public ProfileResponse createProfile(Long userId, CreateProfileRequest request) {
         log.info("Creating profile userId={}", userId);
         ensureProfileNotExists(userId);
 
-        User user = userFinder.findById(userId);
+        User user = userFinder.findByIdOrThrow(userId);
         Profile entity = Profile.create(user, request.firstName(), request.lastName());
         profileRepository.save(entity);
         log.info("Profile created userId={}", entity.getId());
@@ -58,10 +58,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasAnyAuthority('USER')")
+    @PreAuthorize("#userId == authentication.principal.userId")
     public ProfileResponse updateProfile(Long userId, UpdateProfileRequest request) {
         log.info("Updating profile userId={}", userId);
-        Profile entity = getProfileByUserId(userFinder.findById(userId));
+        Profile entity = getProfileByUserId(userFinder.findByIdOrThrow(userId));
         entity.applyPatch(request.firstName(), request.lastName());
         profileRepository.save(entity);
 
