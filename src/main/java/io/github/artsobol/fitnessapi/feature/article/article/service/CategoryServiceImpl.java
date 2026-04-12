@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +52,7 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public CategoryResponse create(CreateCategoryRequest request) {
         log.info("Creating category categorySlug={}", request.slug());
         ensureSlugNotExists(request.slug());
@@ -62,6 +64,7 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public CategoryResponse update(String categorySlug, UpdateCategoryRequest request) {
         log.info("Updating category categorySLug={}", categorySlug);
         Category entity = findBySlug(categorySlug);
@@ -74,6 +77,7 @@ public class CategoryServiceImpl implements CategoryService, CategoryFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void delete(String categorySlug) {
         log.info("Deleting category categorySlug={}", categorySlug);
         Category entity = findBySlug(categorySlug);

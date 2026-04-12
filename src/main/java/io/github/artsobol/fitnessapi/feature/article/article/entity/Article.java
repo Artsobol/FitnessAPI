@@ -1,20 +1,24 @@
 package io.github.artsobol.fitnessapi.feature.article.article.entity;
 
+import io.github.artsobol.fitnessapi.feature.user.entity.User;
 import io.github.artsobol.fitnessapi.feature.video.entity.Video;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -53,6 +57,11 @@ public class Article {
             inverseJoinColumns = @JoinColumn(name = "video_id"))
     private Set<Video> videos = new HashSet<>();
 
+    @Getter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false, updatable = false)
+    private User author;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -61,15 +70,20 @@ public class Article {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public static Article create(String title, String description) {
+    @LastModifiedBy
+    @Column(name = "last_modified_by")
+    private Long lastModifiedBy;
+
+    public static Article create(User author, String title, String description) {
         Article entity = new Article();
+        entity.setAuthor(author);
         entity.updateTitle(title);
         entity.updateDescription(description);
 
         return entity;
     }
     
-    public void applyPatch(String name, String description) {
+    public void applyPatch(String title, String description) {
         if (title != null) {
             this.updateTitle(title);
         }
@@ -121,5 +135,12 @@ public class Article {
             throw new IllegalArgumentException("category not in article with id " + id);
         }
         this.categories.remove(category);
+    }
+
+    private void setAuthor(User author) {
+        if (author == null) {
+            throw new IllegalArgumentException("author must be not null");
+        }
+        this.author = author;
     }
 }

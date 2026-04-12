@@ -12,9 +12,9 @@ public interface ArticleService {
 
     Slice<ArticleResponse> getAll(Pageable pageable);
 
-    ArticleResponse create(CreateArticleRequest request);
+    ArticleResponse create(CreateArticleRequest request, Long userId);
 
-    ArticleResponse update(Long id, UpdateArticleRequest request);
+    ArticleResponse update(UpdateArticleRequest request, Long articleId);
 
     ArticleResponse addVideo(Long articleId, Long videoId);
 
@@ -24,5 +24,5 @@ public interface ArticleService {
 
     void removeCategory(Long articleId, Long categoryId);
 
-    void delete(Long id);
+    void delete(Long articleId);
 }

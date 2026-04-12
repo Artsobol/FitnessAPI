@@ -8,12 +8,15 @@ import io.github.artsobol.fitnessapi.feature.article.article.entity.Article;
 import io.github.artsobol.fitnessapi.feature.article.article.entity.Category;
 import io.github.artsobol.fitnessapi.feature.article.article.mapper.ArticleMapper;
 import io.github.artsobol.fitnessapi.feature.article.article.repository.ArticleRepository;
+import io.github.artsobol.fitnessapi.feature.user.entity.User;
+import io.github.artsobol.fitnessapi.feature.user.service.UserFinder;
 import io.github.artsobol.fitnessapi.feature.video.entity.Video;
 import io.github.artsobol.fitnessapi.feature.video.service.VideoFinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
     private final VideoFinder videoFinder;
     private final CategoryFinder categoryFinder;
     private final ArticleRepository repository;
+    private final UserFinder userFinder;
 
     @Override
     @Transactional(readOnly = true)
@@ -48,18 +52,21 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
 
     @Override
     @Transactional
-    public ArticleResponse create(CreateArticleRequest request) {
+    @PreAuthorize("hasAnyAuthority('TRAINER', 'ADMIN') and #userId == authentication.principal.userId")
+    public ArticleResponse create(CreateArticleRequest request, Long userId) {
         log.info("Creating article title={}", request.title());
-        Article entity = Article.create(request.title(), request.description());
+        User user = userFinder.findByIdOrThrow(userId);
+        Article entity = Article.create(user, request.title(), request.description());
         repository.save(entity);
 
-        log.info("Created article articleId={}", entity.getId());
+        log.info("Created article articleId={} authorId={}", entity.getId(), entity.getAuthor().getId());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
-    public ArticleResponse update(Long articleId, UpdateArticleRequest request) {
+    @PreAuthorize("hasAuthority('ADMIN') or @articleAccess.canEdit(#articleId, authentication)")
+    public ArticleResponse update(UpdateArticleRequest request, Long articleId) {
         log.info("Updating article articleId={}", articleId);
         Article entity = findByIdOrThrow(articleId);
         entity.applyPatch(request.title(), request.description());
@@ -70,6 +77,7 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @articleAccess.canEdit(#articleId, authentication)")
     public ArticleResponse addVideo(Long articleId, Long videoId) {
         log.info("Adding video videoId={} articleId={}", videoId, articleId);
         Article entity = findByIdOrThrow(articleId);
@@ -82,6 +90,7 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @articleAccess.canEdit(#articleId, authentication)")
     public ArticleResponse addCategory(Long articleId, Long categoryId) {
         log.info("Adding category categoryId={} articleId={}", categoryId, articleId);
         Article entity = findByIdOrThrow(articleId);
@@ -94,6 +103,7 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @articleAccess.canEdit(#articleId, authentication)")
     public void removeVideo(Long articleId, Long videoId) {
         log.info("Removing video videoId={} articleId={}", videoId, articleId);
         Article entity = findByIdOrThrow(articleId);
@@ -104,6 +114,7 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @articleAccess.canEdit(#articleId, authentication)")
     public void removeCategory(Long articleId, Long categoryId) {
         log.info("Removing category categoryId={} articleId={}", categoryId, articleId);
         Article entity = findByIdOrThrow(articleId);
@@ -114,6 +125,7 @@ public class ArticleServiceImpl implements ArticleService, ArticleFinder {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or @articleAccess.canEdit(#articleId, authentication)")
     public void delete(Long articleId) {
         log.info("Deleting article articleId={}", articleId);
         Article entity = findByIdOrThrow(articleId);

@@ -5,12 +5,14 @@ import io.github.artsobol.fitnessapi.feature.article.article.dto.request.CreateA
 import io.github.artsobol.fitnessapi.feature.article.article.dto.request.UpdateArticleRequest;
 import io.github.artsobol.fitnessapi.feature.article.article.dto.response.ArticleResponse;
 import io.github.artsobol.fitnessapi.feature.article.article.service.ArticleService;
+import io.github.artsobol.fitnessapi.security.user.UserPrincipal;
 import io.github.artsobol.fitnessapi.utils.UriUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,8 +42,11 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<ArticleResponse> create(@RequestBody @Valid CreateArticleRequest request) {
-        ArticleResponse response = articleService.create(request);
+    public ResponseEntity<ArticleResponse> create(
+            @RequestBody @Valid CreateArticleRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        ArticleResponse response = articleService.create(request, userPrincipal.userId());
 
         return ResponseEntity.created(UriUtils.buildLocation(response.id())).body(response);
     }
@@ -50,12 +55,16 @@ public class ArticleController {
     public ArticleResponse update(
             @PathVariable @Positive Long articleId,
             @RequestBody @Valid UpdateArticleRequest request
+
     ) {
-        return articleService.update(articleId, request);
+        return articleService.update(request, articleId);
     }
 
     @DeleteMapping("/{articleId}")
-    public ResponseEntity<Void> delete(@PathVariable Long articleId) {
+    public ResponseEntity<Void> delete(
+            @PathVariable Long articleId
+
+    ) {
         articleService.delete(articleId);
 
         return ResponseEntity.noContent().build();
@@ -65,6 +74,7 @@ public class ArticleController {
     public ArticleResponse addCategory(
             @PathVariable @Positive Long articleId,
             @PathVariable @Positive Long categoryId
+
     ) {
         return articleService.addCategory(articleId, categoryId);
     }
@@ -73,6 +83,7 @@ public class ArticleController {
     public ResponseEntity<Void> removeCategory(
             @PathVariable @Positive Long articleId,
             @PathVariable @Positive Long categoryId
+
     ) {
         articleService.removeCategory(articleId, categoryId);
 
@@ -80,12 +91,16 @@ public class ArticleController {
     }
 
     @PostMapping("/{articleId}/videos/{videoId}")
-    public ArticleResponse addVideo(@PathVariable @Positive Long articleId, @PathVariable @Positive Long videoId) {
+    public ArticleResponse addVideo(@PathVariable @Positive Long articleId, @PathVariable @Positive Long videoId
+
+    ) {
         return articleService.addVideo(articleId, videoId);
     }
 
     @DeleteMapping("/{articleId}/videos/{videoId}")
-    public ResponseEntity<Void> removeVideo(@PathVariable @Positive Long articleId, @PathVariable @Positive Long videoId) {
+    public ResponseEntity<Void> removeVideo(@PathVariable @Positive Long articleId, @PathVariable @Positive Long videoId
+
+    ) {
         articleService.removeVideo(articleId, videoId);
 
         return ResponseEntity.noContent().build();
