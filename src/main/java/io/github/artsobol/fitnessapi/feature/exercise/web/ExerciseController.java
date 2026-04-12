@@ -1,5 +1,6 @@
 package io.github.artsobol.fitnessapi.feature.exercise.web;
 
+import io.github.artsobol.fitnessapi.api.common.dto.SliceResponse;
 import io.github.artsobol.fitnessapi.feature.exercise.dto.request.CreateExerciseRequest;
 import io.github.artsobol.fitnessapi.feature.exercise.dto.request.UpdateExerciseRequest;
 import io.github.artsobol.fitnessapi.feature.exercise.dto.response.ExerciseResponse;
@@ -8,6 +9,7 @@ import io.github.artsobol.fitnessapi.utils.UriUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @Validated
 @RestController
 @RequestMapping("/exercises")
@@ -31,8 +31,8 @@ public class ExerciseController {
     private final ExerciseService exerciseService;
 
     @GetMapping
-    public List<ExerciseResponse> getAll() {
-        return exerciseService.getAll();
+    public SliceResponse<ExerciseResponse> getAll(Pageable pageable) {
+        return SliceResponse.from(exerciseService.getAll(pageable));
     }
 
     @GetMapping("/{exerciseId}")

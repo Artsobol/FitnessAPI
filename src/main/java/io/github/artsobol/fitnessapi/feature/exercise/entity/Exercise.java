@@ -94,6 +94,21 @@ public class Exercise {
         return entity;
     }
 
+    public void applyPatch(String title, String description, MuscleGroup muscleGroup, TrainingLevel trainingLevel) {
+        if (title != null) {
+            updateTitle(title);
+        }
+        if (description != null) {
+            updateDescription(description);
+        }
+        if (muscleGroup != null) {
+            setMuscleGroup(muscleGroup);
+        }
+        if (trainingLevel != null) {
+            setTrainingLevel(trainingLevel);
+        }
+    }
+
     public void updateTitle(String title) {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("title must not be blank");

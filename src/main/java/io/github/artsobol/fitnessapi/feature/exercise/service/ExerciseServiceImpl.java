@@ -11,11 +11,10 @@ import io.github.artsobol.fitnessapi.feature.video.entity.Video;
 import io.github.artsobol.fitnessapi.feature.video.service.VideoFinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -36,15 +35,20 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExerciseResponse> getAll() {
-        log.debug("Find all exercise");
-        return repository.findByIsActiveTrue().stream().map(mapper::toResponse).collect(Collectors.toList());
+    public Slice<ExerciseResponse> getAll(Pageable pageable) {
+        log.debug(
+                "Fetching exercise page={} size={} sort={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort()
+        );
+        return repository.findByIsActiveTrue(pageable).map(mapper::toResponse);
     }
 
     @Override
     @Transactional
     public ExerciseResponse create(CreateExerciseRequest request) {
-        log.info("Create exercise title={}", request.title());
+        log.info("Creating exercise exerciseTitle={}", request.title());
         Exercise entity = Exercise.create(
                 request.title(),
                 request.description(),
@@ -53,61 +57,54 @@ public class ExerciseServiceImpl implements ExerciseService, ExerciseFinder {
         );
         repository.save(entity);
 
+        log.info("Exercise created exerciseId={}", entity.getId());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
-    public ExerciseResponse update(Long id, UpdateExerciseRequest request) {
-        log.info("Update exercise exerciseId={}", id);
-        Exercise entity = findByIdOrThrow(id);
-        if (request.title() != null && !request.title().isBlank()) {
-            entity.updateTitle(request.title());
-        }
-        if (request.description() != null) {
-            entity.updateDescription(request.description());
-        }
-        if (request.muscleGroup() != null) {
-            entity.setMuscleGroup(request.muscleGroup());
-        }
-        if (request.trainingLevel() != null) {
-            entity.setTrainingLevel(request.trainingLevel());
-        }
+    public ExerciseResponse update(Long exerciseId, UpdateExerciseRequest request) {
+        log.info("Updating exercise exerciseId={}", exerciseId);
+        Exercise entity = findByIdOrThrow(exerciseId);
+        entity.applyPatch(request.title(), request.description(), request.muscleGroup(), request.trainingLevel());
 
+        log.info("Exercise updated exerciseId={}", entity.getId());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
-    public ExerciseResponse addVideo(Long id, Long videoId) {
-        log.info("Add video videoId={} fromExerciseId={}", videoId, id);
-        Exercise entity = findByIdOrThrow(id);
+    public ExerciseResponse addVideo(Long exerciseId, Long videoId) {
+        log.info("Adding video exerciseId={} videoId={}", exerciseId, videoId);
+        Exercise entity = findByIdOrThrow(exerciseId);
         Video video = videoFinder.findByIdOrThrow(videoId);
         entity.addVideo(video);
 
+        log.info("Video added exerciseId={} videoId={}", entity.getId(), video.getId());
         return mapper.toResponse(entity);
     }
 
     @Override
     @Transactional
-    public void removeVideo(Long id, Long videoId) {
-        log.info("Remove video videoId={} fromExerciseId={}", videoId, id);
-        Exercise entity = findByIdOrThrow(id);
+    public void removeVideo(Long exerciseId, Long videoId) {
+        log.info("Removing video exerciseId={} videoId={}", exerciseId, videoId);
+        Exercise entity = findByIdOrThrow(exerciseId);
         Video video = videoFinder.findByIdOrThrow(videoId);
         entity.removeVideo(video);
     }
 
     @Override
     @Transactional
-    public void deactivate(Long id) {
-        log.info("Deactivate exercise id={}", id);
-        Exercise entity = findByIdOrThrow(id);
+    public void deactivate(Long exerciseId) {
+        log.info("Deactivating exercise exerciseId={}", exerciseId);
+        Exercise entity = findByIdOrThrow(exerciseId);
         entity.deactivate();
+        log.info("Exercise deactivated exerciseId={}", entity.getId());
     }
 
     @Override
     public Exercise findByIdOrThrow(Long id) {
-        log.debug("Find exercise id={}", id);
+        log.debug("Fetching exercise exerciseId={}", id);
         return repository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new NotFoundException("{exercise.id.not.found}", id));
     }
