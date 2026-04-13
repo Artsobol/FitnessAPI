@@ -21,9 +21,17 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-  mvc:
-    servlet:
-      path: /api/v1
+server:
+  servlet:
+    context-path: /api/v1
+
+springdoc:
+  swagger-ui:
+    operationsSorter: method
+    tags-sorter: alpha
+    doc-expansion: list
+    display-request-duration: true
+    try-it-out-enabled: true
 
 app:
   i18n:

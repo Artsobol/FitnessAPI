@@ -4,6 +4,14 @@ import io.github.artsobol.fitnessapi.config.properties.security.CookieProperties
 import io.github.artsobol.fitnessapi.feature.auth.auth.dto.response.AuthResponse;
 import io.github.artsobol.fitnessapi.feature.auth.auth.service.RefreshService;
 import io.github.artsobol.fitnessapi.feature.auth.refreshtoken.dto.request.RotateRefreshTokenRequest;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ErrorResponse;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ValidationErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
+@Tag(name = "Auth")
 @RequestMapping("/auth/refresh")
 @RequiredArgsConstructor
 public class RefreshController {
@@ -26,6 +35,16 @@ public class RefreshController {
     private final RefreshService service;
 
     @PostMapping
+    @Operation(summary = "Refresh token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public ResponseEntity<AuthResponse> login(
             @CookieValue(value = "refresh_token", required = false) String refreshToken,
             HttpServletRequest servletRequest

@@ -6,9 +6,19 @@ import io.github.artsobol.fitnessapi.feature.article.article.dto.request.UpdateC
 import io.github.artsobol.fitnessapi.feature.article.article.dto.response.CategoryResponse;
 import io.github.artsobol.fitnessapi.feature.article.article.service.CategoryService;
 import io.github.artsobol.fitnessapi.infrastructure.validation.annotation.Slug;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ErrorResponse;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ValidationErrorResponse;
 import io.github.artsobol.fitnessapi.utils.UriUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
+@Tag(name = "Category")
 @RequiredArgsConstructor
 @RequestMapping("/categories")
 public class CategoryController {
@@ -30,16 +41,40 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public SliceResponse<CategoryResponse> getAll(Pageable pageable) {
+    @Operation(summary = "Get categories")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200")
+    })
+    public SliceResponse<CategoryResponse> getAll(@ParameterObject Pageable pageable) {
         return SliceResponse.from(categoryService.getAll(pageable));
     }
 
     @GetMapping("/{slug}")
-    public CategoryResponse getBySlug(@PathVariable @Slug String slug) {
+    @Operation(summary = "Get category by id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    public CategoryResponse getBySlug(@Parameter(example = "healthy") @PathVariable @Slug String slug) {
         return categoryService.getBySlug(slug);
     }
 
     @PostMapping
+    @Operation(summary = "Create category")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "400",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public ResponseEntity<CategoryResponse> create(@RequestBody @Valid CreateCategoryRequest request) {
         CategoryResponse response = categoryService.create(request);
 
@@ -47,15 +82,37 @@ public class CategoryController {
     }
 
     @PatchMapping("/{slug}")
+    @Operation(summary = "Update category")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public CategoryResponse update(
-            @PathVariable @Slug String slug,
+            @Parameter(example = "healthy") @PathVariable @Slug String slug,
             @RequestBody @Valid UpdateCategoryRequest request
     ) {
         return categoryService.update(slug, request);
     }
 
     @DeleteMapping("/{slug}")
-    public ResponseEntity<Void> delete(@PathVariable @Slug String slug) {
+    @Operation(summary = "Delete category")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "400",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    public ResponseEntity<Void> delete(@Parameter(example = "healthy") @PathVariable @Slug String slug) {
         categoryService.delete(slug);
 
         return ResponseEntity.noContent().build();

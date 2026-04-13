@@ -4,8 +4,11 @@ import io.github.artsobol.fitnessapi.api.common.dto.SliceResponse;
 import io.github.artsobol.fitnessapi.feature.training.sessionexercise.dto.response.TrainingSessionExerciseResponse;
 import io.github.artsobol.fitnessapi.feature.training.sessionexercise.service.TrainingSessionExerciseService;
 import io.github.artsobol.fitnessapi.security.user.UserPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -18,16 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping
+@Tag(name = "Training Session Exercise")
 @RequiredArgsConstructor
 public class TrainingSessionExerciseController {
 
     private final TrainingSessionExerciseService trainingSessionExerciseService;
 
     @GetMapping("/training-sessions/{sessionId}/exercises")
+    @Operation(summary = "Get exercises session by training")
     public SliceResponse<TrainingSessionExerciseResponse> getAllByTrainingSession(
             @PathVariable @Positive Long sessionId,
             @AuthenticationPrincipal UserPrincipal principal,
-            Pageable pageable
+            @ParameterObject Pageable pageable
     ) {
         return SliceResponse.from(trainingSessionExerciseService.getAllByTrainingSession(
                 sessionId,

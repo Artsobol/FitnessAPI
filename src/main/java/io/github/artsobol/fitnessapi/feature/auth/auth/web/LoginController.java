@@ -7,6 +7,14 @@ import io.github.artsobol.fitnessapi.feature.auth.auth.dto.response.AuthResponse
 import io.github.artsobol.fitnessapi.feature.auth.auth.service.LoginService;
 import io.github.artsobol.fitnessapi.feature.auth.auth.support.DeviceInfo;
 import io.github.artsobol.fitnessapi.feature.auth.auth.support.UserAgentService;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ErrorResponse;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ValidationErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
+@Tag(name = "Auth")
 @RequestMapping("/auth/login")
 @RequiredArgsConstructor
 public class LoginController {
@@ -32,6 +41,14 @@ public class LoginController {
     private final UserAgentService userAgentService;
 
     @PostMapping
+    @Operation(summary = "Log in to account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest loginRequest,
             HttpServletRequest servletRequest

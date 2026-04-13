@@ -3,8 +3,15 @@ package io.github.artsobol.fitnessapi.feature.training.favourite.web;
 import io.github.artsobol.fitnessapi.api.common.dto.SliceResponse;
 import io.github.artsobol.fitnessapi.feature.training.favourite.dto.response.TrainingFavouriteResponse;
 import io.github.artsobol.fitnessapi.feature.training.favourite.service.TrainingFavouriteService;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ErrorResponse;
 import io.github.artsobol.fitnessapi.security.user.UserPrincipal;
 import io.github.artsobol.fitnessapi.utils.UriUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
+@Tag(name = "Favourite Training")
 @RequestMapping("/training/")
 @RequiredArgsConstructor
 public class TrainingFavouriteController {
@@ -27,6 +35,14 @@ public class TrainingFavouriteController {
     private final TrainingFavouriteService trainingFavouriteService;
 
     @PostMapping("/{trainingId}")
+    @Operation(summary = "Add training to favourite")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public ResponseEntity<TrainingFavouriteResponse> create(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable @Positive Long trainingId
@@ -37,6 +53,12 @@ public class TrainingFavouriteController {
     }
 
     @GetMapping
+    @Operation(summary = "Get own favourite trainings")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public SliceResponse<TrainingFavouriteResponse> getAll(
             Pageable pageable,
             @AuthenticationPrincipal UserPrincipal userPrincipal
@@ -44,7 +66,16 @@ public class TrainingFavouriteController {
         return SliceResponse.from(trainingFavouriteService.getAll(userPrincipal.userId(), pageable));
     }
 
+
     @DeleteMapping("/{trainingId}")
+    @Operation(summary = "Delete favourite training")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public ResponseEntity<Void> delete(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable @Positive Long trainingId

@@ -4,8 +4,16 @@ import io.github.artsobol.fitnessapi.feature.user.dto.request.CreateProfileReque
 import io.github.artsobol.fitnessapi.feature.user.dto.request.UpdateProfileRequest;
 import io.github.artsobol.fitnessapi.feature.user.dto.response.ProfileResponse;
 import io.github.artsobol.fitnessapi.feature.user.service.ProfileService;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ErrorResponse;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ValidationErrorResponse;
 import io.github.artsobol.fitnessapi.security.user.UserPrincipal;
 import io.github.artsobol.fitnessapi.utils.UriUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,22 +28,45 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/profiles")
+@Tag(name = "Profile")
 @RequiredArgsConstructor
 public class ProfileController {
 
     private final ProfileService service;
 
     @GetMapping("/me")
+    @Operation(summary = "Get own profile")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ProfileResponse getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         return service.getProfileByUserId(userPrincipal.userId());
     }
 
     @GetMapping("/{username}")
+    @Operation(summary = "Get profile by username")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ProfileResponse getProfileByUsername(@PathVariable String username) {
         return service.getProfileByUsername(username);
     }
 
     @PostMapping
+    @Operation(summary = "Get profile by username")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "400",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public ResponseEntity<ProfileResponse> createProfile(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody @Valid CreateProfileRequest request
@@ -46,6 +77,14 @@ public class ProfileController {
     }
 
     @PatchMapping
+    @Operation(summary = "Update profile")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public ProfileResponse updateProfile(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody @Valid UpdateProfileRequest request

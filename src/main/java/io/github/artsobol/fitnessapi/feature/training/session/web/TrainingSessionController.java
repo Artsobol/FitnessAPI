@@ -3,10 +3,18 @@ package io.github.artsobol.fitnessapi.feature.training.session.web;
 import io.github.artsobol.fitnessapi.api.common.dto.SliceResponse;
 import io.github.artsobol.fitnessapi.feature.training.session.dto.response.TrainingSessionResponse;
 import io.github.artsobol.fitnessapi.feature.training.session.service.TrainingSessionService;
+import io.github.artsobol.fitnessapi.infrastructure.web.error.dto.ErrorResponse;
 import io.github.artsobol.fitnessapi.security.user.UserPrincipal;
 import io.github.artsobol.fitnessapi.utils.UriUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,20 +29,35 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping
+@Tag(name = "Training Session")
 @RequiredArgsConstructor
 public class TrainingSessionController {
 
     private final TrainingSessionService trainingSessionService;
 
     @GetMapping("/training-sessions")
+    @Operation(summary = "Get all sessions current user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public SliceResponse<TrainingSessionResponse> getAllByCurrentUser(
             @AuthenticationPrincipal UserPrincipal principal,
-            Pageable pageable
+            @ParameterObject Pageable pageable
     ) {
         return SliceResponse.from(trainingSessionService.getAllByUser(principal.userId(), pageable));
     }
 
     @GetMapping("/training-sessions/{sessionId}")
+    @Operation(summary = "Get concrete session current user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public TrainingSessionResponse getById(
             @PathVariable @Positive Long sessionId,
             @AuthenticationPrincipal UserPrincipal principal
@@ -43,6 +66,14 @@ public class TrainingSessionController {
     }
 
     @PostMapping("/trainings/{trainingId}/sessions")
+    @Operation(summary = "Create training session")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public ResponseEntity<TrainingSessionResponse> create(
             @PathVariable @Positive Long trainingId,
             @AuthenticationPrincipal UserPrincipal principal
@@ -53,6 +84,14 @@ public class TrainingSessionController {
     }
 
     @PatchMapping("/training-sessions/{sessionId}/complete")
+    @Operation(summary = "Complete training session")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public TrainingSessionResponse complete(
             @PathVariable @Positive Long sessionId,
             @AuthenticationPrincipal UserPrincipal principal
@@ -61,6 +100,14 @@ public class TrainingSessionController {
     }
 
     @PatchMapping("/training-sessions/{sessionId}/abandon")
+    @Operation(summary = "Abandon training session")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     public TrainingSessionResponse abandon(
             @PathVariable @Positive Long sessionId,
             @AuthenticationPrincipal UserPrincipal principal
